@@ -1,42 +1,37 @@
-function them_sp(){
-	var q = 'them_sp',
-	tensp = $('#tensp').val(),
-	gia = $('#gia').val(),
-	baohanh = $('#baohanh').val(),
-	trongluong = $('#trongluong').val(),
-	chatlieu = $('#chatlieu').val(),
-	chongnuoc = $('#chongnuoc').val(),
-	nangluong = $('#nangluong').val(),
-	loaibh = $('#loaibh').val(),
-	kichthuoc = $('#kichthuoc').val(),
-	mau = $('#mau').val(),
-	danhcho = $('#danhcho').val(),
-	phukien = $('#phukien').val(),
-	khuyenmai = $('#khuyenmai').val(),
-	tinhtrang = $('#tinhtrang').val(),
-	madm = $('#madm').val(),
-	anhchinh = $('#anhchinh').val();
-	console.log(tensp);
-	console.log(madm);
-	console.log(gia);
-	if(tensp == "" || gia == ""){
-		alert("Tên sản phẩm và giá không được để trống!");
-		return 0;
-	}
-	$.ajax({
-		url : "for-ajax.php",
-		type : "post",
-		dataType:"text",
-		data : {
-			q, tensp, gia, baohanh, trongluong, chatlieu, chongnuoc, nangluong
-			, loaibh, kichthuoc, mau, danhcho, phukien, khuyenmai, tinhtrang, madm, anhchinh
-		},
-		success : function (result){
-			$("#sp_error").html(result);
-			window.location.reload();
-		}
-	});
+function them_sp() {
+    var formData = new FormData($("#add-product-form")[0]);
+
+    // Kiểm tra tên sản phẩm và giá
+    var tensp = $('#tensp').val();
+    var gia = $('#gia').val();
+
+    if (tensp == "" || gia == "") {
+        alert("Tên sản phẩm và giá không được để trống!");
+        return;
+    }
+
+    $.ajax({
+        url: "for-ajax.php",  // Đảm bảo rằng đường dẫn đúng
+        type: "POST",
+        data: formData,
+        dataType: "text",
+        contentType: false,  // Không tự động định dạng lại dữ liệu
+        processData: false,  // Không xử lý dữ liệu tự động
+        success: function(result) {
+            $("#sp_error").html(result);
+            if (result.indexOf("Thêm sản phẩm thành công") !== -1) {
+                // Reload lại trang khi thêm sản phẩm thành công
+                window.location.reload();
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error("AJAX error:", textStatus, errorThrown);
+        }
+    });
 }
+
+
+
 function xoa_sp(masp_xoa){
 	var q = 'xoa_sp';
 	$.ajax({

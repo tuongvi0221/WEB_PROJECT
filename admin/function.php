@@ -7,6 +7,24 @@ function connect(){
 function disconnect($conn){
 	mysqli_close($conn);
 }
+
+
+function displayCategorySelect() {
+    // Kết nối đến cơ sở dữ liệu
+    $connect = connect();
+    $str = "SELECT * FROM danhmucsp"; // Truy vấn lấy danh mục sản phẩm
+    $result = $connect->query($str);
+
+    // Hiển thị combobox
+    echo "<select name='madanhmuc' class='form-control'>";
+    while ($row = $result->fetch_row()) {
+        // Lưu mã danh mục làm giá trị, tên danh mục hiển thị trên combobox
+        echo "<option value='$row[0]'>" . $row[1] . "</option>";
+    }
+    echo "</select>";
+}
+
+
 //Danh sach thanh vien
 function member_list(){
 	$conn = connect();
@@ -149,18 +167,10 @@ function product_list(){
         <th>STT</th>
         <th>Tên</th>
         <th>Giá</th>
-        <th>Bảo Hành</th>
-        <th>Trọng lượng</th>
         <th>Chất liệu</th>
-        <th>Chống nước</th>
-        <th>Năng lượng</th>
-        <th>Loại bảo hành</th>
-        <th>Kích thước</th>
         <th>Màu</th>
         <th>Dành cho</th>
-        <th>Phụ kiện</th>
         <th>Khuyến Mãi</th>
-        <th>Tình trạng</th>
         <th>Loại</th>
         <th>Ảnh</th>
         <th>Ngày nhập</th>
@@ -177,18 +187,10 @@ function product_list(){
         <td><?php echo $i++ ?></td>
         <td><?php echo $row['tensp'] ?></td>
         <td><?php echo $row['gia'] ?></td>
-        <td><?php echo $row['baohanh'] ?></td>
-        <td><?php echo $row['trongluong'] ?></td>
         <td><?php echo $row['chatlieu'] ?></td>
-        <td><?php echo $row['chongnuoc'] ?></td>
-        <td><?php echo $row['nangluong'] ?></td>
-        <td><?php echo $row['loaibh'] ?></td>
-        <td><?php echo $row['kichthuoc'] ?></td>
         <td><?php echo $row['mau'] ?></td>
         <td><?php echo $row['danhcho'] ?></td>
-        <td><?php echo $row['phukien'] ?></td>
         <td><?php echo $row['khuyenmai'] ?></td>
-        <td><?php echo $row['tinhtrang'] ?></td>
         <td><?php echo $row['tendm'] ?></td>
         <td><img src="../<?php echo $row['anhchinh'] ?>"></td>
         <td><?php echo $row['ngay_nhap'] ?></td>

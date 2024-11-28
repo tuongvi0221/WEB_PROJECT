@@ -1,0 +1,33 @@
+.card {
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+}
+
+.card h3 {
+    font-size: 1.5rem;
+    color: #007bff;
+}
+
+.form-label {
+    font-weight: bold;
+    color: #333;
+}
+
+input[type="file"] {
+    cursor: pointer;
+}
+
+#sp_error {
+    font-size: 0.9rem;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}

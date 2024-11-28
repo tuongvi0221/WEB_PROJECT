@@ -30,6 +30,8 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="libs/style.css">
     <link rel="stylesheet" href="../libs/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="script.js"></script>
     <script src="../libs/jquery/jquery-latest.js"></script>
     <script src="../libs/bootstrap/js/bootstrap.min.js"></script>
     <script src="ajax.js"></script>
@@ -70,7 +72,7 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                 current
             },
             success: function(result) {
-                if (result.search('Đã hết hàng') != -1) {
+                if (result.search('Đã hết mục để hiển thị') != -1) {
                     alert('Đã hết mục để hiển thị!');
                     return;
                 }
@@ -93,7 +95,7 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                 stt
             },
             success: function(result) {
-                if (result.search('Đã hết hàng') != -1) {
+                if (result.search('Đã hết mục để hiển thị') != -1) {
                     alert("Đã hết mục để hiển thị!");
                     return;
                 }
@@ -139,12 +141,8 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                                 <input type="text" id='tensp-edit' class="form-control">
                                 <label>Giá</label>
                                 <input type="text" id='gia-edit' class="form-control">
-                                <label>Bảo hành</label>
-                                <input type="text" id='baohanh-edit' class="form-control">
                                 <label>Khuyến mãi</label>
                                 <input type="text" id='khuyenmai-edit' class="form-control">
-                                <label>Tình trạng</label>
-                                <input type="text" id='tinhtrang-edit' class="form-control"><br>
                                 <span class="btn btn-success" id="edit_sp_btn">Xong</span>
                                 <span class="btn btn-default" onclick="$('#sua_sp-area').hide(300)">Hủy</span>
                             </div>
@@ -161,103 +159,79 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                         <!-- VÙNG LÀM VIỆC -->
                         <div class="work-space">
                             <!-- Thêm sản phẩm -->
-                            <div id="add-pr">
-                                <h3>Thêm sản phẩm</h3>
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ĐẶC ĐIỂM</th>
-                                            <th>GIÁ TRỊ</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><label>Tên</label></td>
-                                            <td><input type="text" class="form-control" id="tensp"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Giá</label></td>
-                                            <td><input type="text" class="form-control" id="gia"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Bảo hành</label></td>
-                                            <td><input type="text" class="form-control" id="baohanh"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Trọng lượng</label></td>
-                                            <td><input type="text" class="form-control" id="trongluong"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Chất liệu</label></td>
-                                            <td><input type="text" class="form-control" id="chatlieu"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Chống nước</label></td>
-                                            <td>
-                                                <select class="form-control" id="chongnuoc">
-                                                    <option value="1">Có</option>
-                                                    <option value="0">Không</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Năng lượng</label></td>
-                                            <td><input type="text" class="form-control" id="nangluong"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Loại bảo hành</label></td>
-                                            <td><input type="text" class="form-control" id="loaibh"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Kích thước (d x r x c) (cm)</label></td>
-                                            <td><input type="text" class="form-control" id="kichthuoc"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Màu</label></td>
-                                            <td><input type="text" class="form-control" id="mau"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Dành cho</label></td>
-                                            <td><input type="text" class="form-control" id="danhcho"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Phụ kiện</label></td>
-                                            <td><input type="text" class="form-control" id="phukien"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Khuyến mãi</label></td>
-                                            <td><input type="text" class="form-control" id="khuyenmai"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Tình trạng</label></td>
-                                            <td><input type="text" class="form-control" id="tinhtrang"></td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Loại</label></td>
-                                            <td>
-                                                <?php require_once 'function.php'; list_type_pr_for_add(); ?>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><label>Link ảnh</label></td>
-                                            <td><input type="text" class="form-control" id="anhchinh"></td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span onclick="them_sp()" class="btn btn-success">Thêm</span>
-                                                <span class="btn btn-default"
-                                                    onclick="$('#add-pr').toggle(300);$('#tbl-sanpham-list').toggle(300);">Hủy</span>
-                                                <span id="sp_error"></span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div id="add-pr" class="card shadow-sm p-4 mb-4">
+                                <h3 class="text-center text-primary mb-4">Thêm sản phẩm</h3>
+                                <form method="POST" action="add-product.post.php" id="add-product-form"
+                                    enctype="multipart/form-data">
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="tensp" class="form-label">Tên sản phẩm</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="tensp" name="tensp"
+                                                placeholder="Nhập tên sản phẩm">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="gia" class="form-label">Giá</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="number" class="form-control" id="gia" name="gia"
+                                                placeholder="Nhập giá sản phẩm">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="danhcho" class="form-label">Dành cho</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="danhcho" name="danhcho"
+                                                placeholder="Dành cho nam/nữ">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="khuyenmai" class="form-label">Khuyến mãi</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="khuyenmai" name="khuyenmai"
+                                                placeholder="Thông tin khuyến mãi">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="madm" class="form-label">Loại</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <?php
+                                            // Gọi hàm displayCategorySelect() để hiển thị combobox danh mục sản phẩm
+                                            displayCategorySelect();
+                                            ?>
+                                        </div>
+                                    </div>
+                                    >
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="anhchinh" class="form-label">Hình ảnh</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="file" class="form-control" id="anhchinh" name="anhchinh"
+                                                accept="image/*">
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" name="submit">Thêm sản phẩm</button>
+                                        <button type="button" class="btn btn-danger"
+                                            onclick="$('#add-pr').toggle(300);$('#tbl-sanpham-list').toggle(300);">Hủy</button>
+                                        <div id="sp_error" class="text-danger mt-2"></div>
+                                    </div>
+                                </form>
+
                             </div>
-
-
-
-
                         </div>
+
+
                     </div>
                 </div>
 

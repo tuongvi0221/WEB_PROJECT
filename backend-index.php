@@ -335,7 +335,7 @@ function addtocart_action() {
         }
     }
 
-    echo count($_SESSION[$cart_name] + 1);
+    echo count($_SESSION[$cart_name]);
 }
 
   

@@ -30,7 +30,7 @@ function load_more(){
 	if(isset($_GET['current'])){$cr = $_GET['current'];}
 	$st = ($cr+1)*$_SESSION['limit'];
 	if($st >= $_SESSION['total'] - $_SESSION['limit']){
-		echo "Đã hết hàng";
+		echo "Đã hết mục để hiển thị";
 	}
 	$sql = "SELECT * FROM sanpham s, danhmucsp d WHERE s.madm = d.madm ORDER BY ngay_nhap DESC LIMIT ".$st.",".$_SESSION['limit']."";
 	$conn = mysqli_connect('localhost','root','','qlbh') or die('Không thể kết nối!');
@@ -43,22 +43,15 @@ function load_more(){
     <td><?php echo ++$i ?></td>
     <td><?php echo $row['tensp'] ?></td>
     <td><?php echo $row['gia'] ?></td>
-    <td><?php echo $row['baohanh'] ?></td>
-    <td><?php echo $row['trongluong'] ?></td>
     <td><?php echo $row['chatlieu'] ?></td>
-    <td><?php echo $row['chongnuoc'] ?></td>
-    <td><?php echo $row['nangluong'] ?></td>
-    <td><?php echo $row['loaibh'] ?></td>
-    <td><?php echo $row['kichthuoc'] ?></td>
     <td><?php echo $row['mau'] ?></td>
     <td><?php echo $row['danhcho'] ?></td>
-    <td><?php echo $row['phukien'] ?></td>
     <td><?php echo $row['khuyenmai'] ?></td>
-    <td><?php echo $row['tinhtrang'] ?></td>
     <td><?php echo $row['tendm'] ?></td>
     <td><img src="../<?php echo $row['anhchinh'] ?>"></td>
     <td><?php echo $row['ngay_nhap'] ?></td>
-    <td><span class="btn btn-warning" onclick="display_edit_sanpham('<?php echo $row['masp'] ?>')">Sửa</span></td>
+    <td><span onclick="display_edit_sanpham('<?php echo $row['masp'] ?>')"><a class="btn btn-warning"
+                href="#sua_sp-area">Sửa</a></span></td>
     <td><span class="btn btn-danger" onclick="xoa_sp('<?php echo $row['masp'] ?>')">Xóa</span></td>
 </tr>
 
@@ -74,24 +67,24 @@ function load_more_gd(){
 	
 	if($stt == "dagd"){
 		if($st > $_SESSION['gd_dagd'] + 1){
-			echo "Đã hết hàng";
+			echo "Đã hết mục để hiển thị";
 			return;
 		}
 		$sql = "SELECT * FROM giaodich WHERE tinhtrang = 1 LIMIT ".$st.",".$_SESSION['limit']."";
 	} elseif ($stt == "chuagd") {
 		if($st > $_SESSION['gd_chua'] + 1){
-			echo "Đã hết hàng";
+			echo "Đã hết mục để hiển thị";
 			return;
 		}
 		$sql = "SELECT * FROM giaodich WHERE tinhtrang = 0 LIMIT ".$st.",".$_SESSION['limit']."";
 	} else {
 		if($st > $_SESSION['gd_all'] + 1){
-			echo "Đã hết hàng";
+			echo "Đã hết mục để hiển thị";
 			return;
 		}
 		$sql = "SELECT * FROM giaodich LIMIT ".$st.",".$_SESSION['limit']."";
 	}
-	$conn = mysqli_connect('localhost','root','','qlbh') or die('Không thể kết nối!');
+	$conn = mysqli_connect('localhost','root','280704','qlbh') or die('Không thể kết nối!');
 	mysqli_set_charset($conn, 'utf8');
 	$result = mysqli_query($conn, $sql);
 	$i = $st;
@@ -161,80 +154,122 @@ switch ($q) {
 	break;
 }
 function them_sp(){
-	$conn = connect();
-	$tensp = validate_input_sql($conn, $_POST['tensp']);
-	$gia = validate_input_sql($conn, $_POST['gia']);
-	$baohanh = validate_input_sql($conn, $_POST['baohanh']);
-	$trongluong = validate_input_sql($conn, $_POST['trongluong']);
-	$chatlieu = validate_input_sql($conn, $_POST['chatlieu']);
-	$chongnuoc = validate_input_sql($conn, $_POST['chongnuoc']);
-	$nangluong = validate_input_sql($conn, $_POST['nangluong']);
-	$loaibh = validate_input_sql($conn, $_POST['loaibh']);
-	$kichthuoc = validate_input_sql($conn, $_POST['kichthuoc']);
-	$mau = validate_input_sql($conn, $_POST['mau']);
-	$danhcho = validate_input_sql($conn, $_POST['danhcho']);
-	$phukien = validate_input_sql($conn, $_POST['phukien']);
-	$khuyenmai = validate_input_sql($conn, $_POST['khuyenmai']);
-	$tinhtrang = validate_input_sql($conn, $_POST['tinhtrang']);
-	$madm = validate_input_sql($conn, $_POST['madm']);
-	$anhchinh = validate_input_sql($conn, $_POST['anhchinh']);
-	mysqli_set_charset($conn,'utf8');
-	$now = date('d-m-Y h:i:s');
-	$luotmua = rand(200, 1000);
-	$luotxem = rand(1001, 5000);
-	if($tensp == "" || $gia == ""){
-		echo "Tên và giá không được để trống!";
-		return 0;	
+	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+		$tensp = $_POST['tensp'];
+		$gia = $_POST['gia'];
+		$danhcho = $_POST['danhcho'];
+		$khuyenmai = $_POST['khuyenmai'];
+		$madm = $_POST['madm'];
+	
+		// Kiểm tra ảnh
+		if (isset($_FILES['anhchinh']) && $_FILES['anhchinh']['error'] == 0) {
+			$target_dir = "images/"; // Đường dẫn thư mục chứa ảnh
+			$target_file = $target_dir . basename($_FILES["anhchinh"]["name"]);
+			$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+	
+			// Kiểm tra loại file ảnh
+			$allowed_types = ['jpg', 'png', 'jpeg', 'gif'];
+			if (in_array($imageFileType, $allowed_types)) {
+				if (move_uploaded_file($_FILES["anhchinh"]["tmp_name"], $target_file)) {
+					$anhchinh = $target_file; // Lưu đường dẫn ảnh
+				} else {
+					echo "Có lỗi khi tải ảnh lên.";
+					exit;
+				}
+			} else {
+				echo "Chỉ hỗ trợ ảnh JPG, PNG, JPEG, GIF.";
+				exit;
+			}
+		} else {
+			echo "Vui lòng chọn ảnh.";
+			exit;
+		}
+	
+		// Kết nối cơ sở dữ liệu
+		$conn = connect();
+	
+		// Làm sạch dữ liệu đầu vào
+		$tensp = validate_input_sql($conn, $tensp);
+		$gia = validate_input_sql($conn, $gia);
+		$danhcho = validate_input_sql($conn, $danhcho);
+		$khuyenmai = validate_input_sql($conn, $khuyenmai);
+		$madm = validate_input_sql($conn, $madm);
+	
+		// Thêm sản phẩm vào cơ sở dữ liệu
+		$now = date('d-m-Y h:i:s');
+		$luotmua = rand(200, 1000);
+		$luotxem = rand(1001, 5000);
+		
+		$sql = "INSERT INTO sanpham (tensp, gia, danhcho, khuyenmai, madm, anhchinh, luotmua, luotxem, ngaytao) 
+				VALUES ('$tensp', '$gia', '$danhcho', '$khuyenmai', '$madm', '$anhchinh', '$luotmua', '$luotxem', '$now')";
+	
+		if (mysqli_query($conn, $sql)) {
+			echo "Thêm sản phẩm thành công";
+		} else {
+			echo "Có lỗi khi thêm sản phẩm vào cơ sở dữ liệu.";
+		}
+	
+		// Đóng kết nối
+		disconnect($conn);
 	}
-	$sql = "INSERT INTO sanpham VALUES (' ','".$tensp."','".$gia."','".$baohanh." ','".$trongluong." ','".$chatlieu." ','".$chongnuoc." ','".$nangluong." ','".$loaibh." ','".$kichthuoc." ','".$mau." ','".$danhcho." ','".$phukien." ','".$khuyenmai." ','".$tinhtrang." ','".$madm." ','".$anhchinh." ','".$luotmua." ','".$luotxem." ','".$now." ')";
-	if(!mysqli_query($conn, $sql)){
-		echo "<script>alert('Lỗi thêm vào cơ sở dữ liệu, xin nhập lại!')</script>";
-	} else {
-		echo "<script>alert('Thêm thành công sản phẩm!')</script>";
-	}
-	disconnect($conn);
+	
 }
+
+
+
 function xoa_sp(){
-	$masp = $_POST['masp_xoa'];
-	$conn = connect();
-	$sql = "DELETE FROM sanpham WHERE masp = '".$masp."'";
-	if(mysqli_query($conn, $sql)){
-		echo "<script>alert('Xóa thành công!')</script>";
-	} else {
-		echo "<script>alert('Đã xảy ra lỗi!')</script>";
-	}
+$masp = $_POST['masp_xoa'];
+$conn = connect();
+$sql = "DELETE FROM sanpham WHERE masp = '".$masp."'";
+if(mysqli_query($conn, $sql)){
+echo "<script>
+alert('Xóa thành công!')
+</script>";
+} else {
+echo "<script>
+alert('Đã xảy ra lỗi!')
+</script>";
+}
 }
 function them_dm(){
-	$tendm = $_POST['tendm'];
-	$xuatsu = $_POST['xuatsu'];
-	$conn = connect();
-	$sql = "INSERT INTO danhmucsp VALUES (' ','".$tendm."','".$xuatsu."')";
-	if(mysqli_query($conn, $sql)){
-		echo "<script>alert('Thêm danh mục thành công!')</script>";
-	} else {
-		echo "<script>alert('Đã xảy ra lỗi!')</script>";
-	}
+$tendm = $_POST['tendm'];
+$xuatsu = $_POST['xuatsu'];
+$conn = connect();
+$sql = "INSERT INTO danhmucsp VALUES (' ','".$tendm."','".$xuatsu."')";
+if(mysqli_query($conn, $sql)){
+echo "<script>
+alert('Thêm danh mục thành công!')
+</script>";
+} else {
+echo "<script>
+alert('Đã xảy ra lỗi!')
+</script>";
+}
 }
 function xoa_dm(){
-	$madm = $_POST['madm_xoa'];
-	$conn = connect();
-	$sql = "DELETE FROM danhmucsp WHERE madm = '".$madm."'";
-	if(mysqli_query($conn, $sql)){
-		echo "<script>alert('Xóa thành công!')</script>";
-	} else {
-		echo "<script>alert('Lỗi! Bạn phải xóa hết những sản phẩm thuộc danh mục này trước!')</script>";
-	}
+$madm = $_POST['madm_xoa'];
+$conn = connect();
+$sql = "DELETE FROM danhmucsp WHERE madm = '".$madm."'";
+if(mysqli_query($conn, $sql)){
+echo "<script>
+alert('Xóa thành công!')
+</script>";
+} else {
+echo "<script>
+alert('Lỗi! Bạn phải xóa hết những sản phẩm thuộc danh mục này trước!')
+</script>";
+}
 }
 
 //Danh sach giao dich sap xep
 function giaodich_chuagh(){
-	session_start();
-	$conn = connect();
-	mysqli_set_charset($conn, 'utf8');
-	echo $_SESSION['limit'];
-	$sql = "SELECT * FROM giaodich WHERE tinhtrang = 0 LIMIT ".$_SESSION['limit'];
-	$i = 1;
-	$result = mysqli_query($conn, $sql); ?>
+session_start();
+$conn = connect();
+mysqli_set_charset($conn, 'utf8');
+echo $_SESSION['limit'];
+$sql = "SELECT * FROM giaodich WHERE tinhtrang = 0 LIMIT ".$_SESSION['limit'];
+$i = 1;
+$result = mysqli_query($conn, $sql); ?>
 
 <thead>
     <tr>
@@ -401,17 +436,16 @@ function xoa_taikhoan(){
 	}
 	disconnect($conn);
 }
+
 function sua_sp(){
 	$masp = $_POST['masp_sua'];
 	$tensp = $_POST['tensp_ed'];
 	$gia = $_POST['gia_ed'];
-	$baohanh = $_POST['baohanh_ed'];
 	$khuyenmai = $_POST['khuyenmai_ed'];
 	$tinhtrang = $_POST['tinhtrang_ed'];
 	$set = []; $data = [];
 	if($tensp != ""){$data[] = $tensp; $set[] = 'tensp';}
 	if($gia != ""){$data[] = $gia; $set[] = 'gia';}
-	if($baohanh != ""){$data[] = $baohanh; $set[] = 'baohanh';}
 	if($khuyenmai != ""){$data[] = $khuyenmai; $set[] = 'khuyenmai';}
 	if($tinhtrang != ""){$data[] = $tinhtrang; $set[] = 'tinhtrang';}
 	$str = '';
@@ -426,10 +460,7 @@ function sua_sp(){
 	if(!mysqli_query($conn, $sql)){
 		echo "Đã xảy ra lỗi!";
 	} else {
-		echo "<script>alert('Xóa xong!')</script>";
+		echo "<script>alert('Sửa xong!')</script>";
 	}
 	disconnect($conn);
 }
-
-
-?>
