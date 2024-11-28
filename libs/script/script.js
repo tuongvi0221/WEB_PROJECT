@@ -10,7 +10,7 @@
 			fname, current
 		},
 		success : function (result){
-			if(result.search('hetcmnrdungbamnua') != -1){
+			if(result.search('Đã hết') != -1){
 				alert("Đã hết mục để hiện!");
 				$('#loadmorebtn').remove();
 				return 0;
@@ -227,47 +227,53 @@ function call_to_dangky(){
 	});
 }
 
-function addtocart_action(masp){
-	var query = 'addtocart_action';
-	if(!$("#cart_count").hasClass('clicked')){
-		$("#cart_count").addClass('cart_count');
-		$("#cart_count").addClass(' animated tada');
-	} else {
-		$("#cart_count").removeClass(' tada');
-		$("#cart_count").addClass(' flipInX');
-	}
-	setTimeout(function(){$("#cart_count").removeClass(' flipInX');}, 1000)
-	$("#cart_count").addClass('clicked');
-	$.ajax({
-		url : "backend-index.php",
-		type : "post",
-		dataType:"text",
-		data : {
-			query, masp
-		},
-		success : function (result){
-			$('#cart_count').html(result);
-		}
-	});
+function addtocart_action(masp) {
+    var query = 'addtocart_action';
+    if (!$("#cart_count").hasClass('clicked')) {
+        $("#cart_count").addClass('cart_count animated tada');
+    } else {
+        $("#cart_count").removeClass('tada').addClass('flipInX');
+    }
+    setTimeout(function () {
+        $("#cart_count").removeClass('flipInX');
+    }, 1000);
+    $("#cart_count").addClass('clicked');
+
+    $.ajax({
+        url: "backend-index.php",
+        type: "post",
+        dataType: "text",
+        data: {
+            query: query,
+            masp: masp // Truyền mã sản phẩm vào data AJAX
+        },
+        success: function (result) {
+            $('#cart_count').html(result);
+        }
+    });
 }
 
 function xoasanpham(masp) {
     $.ajax({
         url: "backend-index.php",
-        type: "GET",  // Thay "delete" thành "GET"
+        type: "post",
         data: {
             q: "xoasanpham",
             masp: masp
         },
         success: function (result) {
-            alert(result); // Hiển thị phản hồi từ server
-            location.reload(); // Tải lại trang để cập nhật giỏ hàng
+            alert(result); // Thông báo kết quả từ PHP
+            if (result.includes("Đã xóa")) { // Chỉ tải lại nếu thành công
+                location.reload(); // Tải lại trang để cập nhật giỏ hàng
+            }
         },
         error: function () {
             alert("Đã xảy ra lỗi khi xóa sản phẩm.");
         }
     });
 }
+
+
 
 
 
@@ -289,24 +295,40 @@ function hien_sanpham(masp_to_display){
 		}
 	});
 }
-function tinh_tien(){
-	var query = 'tinh_tien';
-	var sl = [];
-	var sum = 0;
-	$('input[name="sl[]"]').each(function() {
-		sl.push($(this).val());
-	});
-	var array = [];
-	$(".cost").each(function() {
-		array.push($(this).data("val"));
-	});
-	for (var i = 0; i < sl.length ; i++) {
-		var tmp = array[i].replace(/ /g,'');
-		sum += Number(tmp)*sl[i];
-	}
-	sum = sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-	$('#tong_tien').html(sum);
+function tinh_tien() {
+    var query = 'tinh_tien';
+    var sl = [];
+    var array = [];
+    var sum = 0;
+
+    // Thu thập số lượng và giá của những sản phẩm được chọn (đánh dấu checkbox)
+    $('input[name="selected_products[]"]:checked').each(function() {
+        var row = $(this).closest(".prd-in-cart"); // Lấy dòng chứa thông tin sản phẩm
+
+        // Lấy số lượng từ input số lượng
+        var quantity = row.find('input[name="sl[]"]').val();
+        sl.push(quantity);
+
+        // Lấy giá trị từ data của phần tử có class "cost"
+        var price = row.find(".cost").data("val").toString().replace(/ /g, '');
+        array.push(price);
+    });
+
+    // Tính tổng tiền
+    for (var i = 0; i < sl.length; i++) {
+        sum += Number(array[i]) * sl[i];
+    }
+
+    // Định dạng số tiền
+    sum = sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+    // Cập nhật tổng tiền vào phần tử HTML
+    $('#tong_tien').html(sum);
 }
+
+
+
+
 function check_before_submit(){
 	var ten = $('#s_ten').val();
 	var quan = $('#s_quan').val();
@@ -325,6 +347,7 @@ function check_before_submit(){
 		
 	}
 }
+
 function like_action(masp_to_like){
 	if($('#s-s').data("stt") == "nosignin"){
 		$('.like-error').toggle("500");
@@ -352,20 +375,4 @@ function like_action(masp_to_like){
 		});
 	}
 	
-}
-function ajax_like(){
-	$('#spm').removeClass('ajaxing');
-	$('#mntq').removeClass('ajaxing');
-	$('#dgg').removeClass('ajaxing');
-	$.ajax({
-		url : "ajax_calling.php",
-		type : "get",
-		dataType:"text",
-		data : {
-			fname: 'php_like'
-		},
-		success : function (result){
-			$('#content').html(result);
-		}
-	});
 }

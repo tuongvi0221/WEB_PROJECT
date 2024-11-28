@@ -2,6 +2,83 @@
 session_start();
 require_once 'cart_functions.php'; // This file contains functions for managing cart actions
 
+// Sample function to simulate getting product details from a database
+function getProductDetails($productId) {
+    // Replace this with actual database code to retrieve product details
+    $sampleProducts = [
+        1 => ['name' => 'Product 1', 'price' => 100.00],
+        2 => ['name' => 'Product 2', 'price' => 150.00]
+    ];
+    return $sampleProducts[$productId] ?? null;
+}
+
+// Function to calculate the total price with discount
+function calculateTotal($cart, $discount = 0) {
+    $total = 0;
+    foreach ($cart as $item) {
+        $total += $item['price'] * $item['quantity'];
+    }
+    return $total * ((100 - $discount) / 100);
+}
+
+// Handle AJAX requests directly within this file
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $response = [];
+
+    // Handle quantity update
+    if (isset($_POST['productId'], $_POST['action'])) {
+        $productId = (int)$_POST['productId'];
+        $action = $_POST['action'];
+
+        if (isset($_SESSION['cart'][$productId])) {
+            if ($action === 'increment') {
+                $_SESSION['cart'][$productId]['quantity']++;
+            } elseif ($action === 'decrement' && $_SESSION['cart'][$productId]['quantity'] > 1) {
+                $_SESSION['cart'][$productId]['quantity']--;
+            }
+        }
+
+        $response['cartHtml'] = renderCartItems($_SESSION['cart']);
+        $response['total'] = number_format(calculateTotal($_SESSION['cart'], $_SESSION['discount'] ?? 0), 2);
+    }
+
+    // Handle discount application
+    if (isset($_POST['discountCode'])) {
+        $discountCode = $_POST['discountCode'];
+        $_SESSION['discount'] = ($discountCode === 'DISCOUNT10') ? 10 : 0;
+        
+        $response['message'] = $_SESSION['discount'] > 0 ? 'Discount applied!' : 'Invalid discount code.';
+        $response['newTotal'] = number_format(calculateTotal($_SESSION['cart'], $_SESSION['discount']), 2);
+    }
+
+    echo json_encode($response);
+    exit();
+}
+
+// Helper function to render cart items (used for AJAX responses)
+function renderCartItems($cart) {
+    ob_start();
+    foreach ($cart as $productId => $item): 
+        $productDetails = getProductDetails($productId);
+?>
+<div class="cart-item">
+    <input type="checkbox" class="select-item" data-id="<?= $productId ?>">
+    <span><?= $productDetails['name'] ?></span>
+    <button type="button" onclick="updateQuantity(<?= $productId ?>, 'decrement')">-</button>
+    <input type="text" value="<?= $item['quantity'] ?>" readonly>
+    <button type="button" onclick="updateQuantity(<?= $productId ?>, 'increment')">+</button>
+    <span><?= number_format($item['price'], 2) ?></span>
+    <span class="item-total"><?= number_format($item['price'] * $item['quantity'], 2) ?></span>
+</div>
+<?php
+    endforeach;
+    return ob_get_clean();
+}
+
+// Calculate total price for initial page load
+$totalPrice = calculateTotal($_SESSION['cart'] ?? [], $_SESSION['discount'] ?? 0);
+?>
+
 // Calculate total price including any applied discounts
 $totalPrice = calculateTotal($_SESSION['cart'] ?? [], $_SESSION['discount'] ?? 0);
 ?>

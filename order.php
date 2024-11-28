@@ -66,7 +66,6 @@ window.onload = function() {
                             <th>TÊN SẢN PHẨM</th>
                             <th>ĐƠN GIÁ</th>
                             <th>SỐ LƯỢNG</th>
-
                         </tr>
                     </thead>
                     <tbody>

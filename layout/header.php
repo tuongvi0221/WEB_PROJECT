@@ -132,8 +132,14 @@ if (isset($_SESSION['user'])) {
             </div>
             <?php }
       ?>
-            <li><a onclick="ajax_giohang()"><i class="glyphicon glyphicon-shopping-cart"></i> Giỏ hàng</a>
-                <div class="mn-ef"></div>
+
+            <li data-userid="<?php echo isset($_SESSION['user']) ? $_SESSION['user']['id'] : ''; ?>"
+                onclick="ajax_giohang()">
+                <i class="glyphicon glyphicon-shopping-cart"></i> Giỏ hàng
+            </li>
+
+
+            <div class="mn-ef"></div>
             </li>
         </ul>
         <div class="header-detail">
@@ -186,29 +192,34 @@ if (isset($_SESSION['user'])) {
                     <li class="menu-name" id="mntq"><a onclick="ajax_buy()">Mua nhiều tuần qua</a></li>
 
                 </ul>
-                <div onclick="ajax_like()" style="cursor: pointer;"><i
-                        class="glyphicon glyphicon-heart navbar-right btn-lg" id="like_count">
+                <div class="like-container" style="cursor: pointer;">
+                    <i class="glyphicon glyphicon-heart navbar-right btn-lg" id="like_count">
                         <?php
-          if(isset($_SESSION['like'])){echo count($_SESSION['like'])-1;}
-          else{echo " 0";}
-          ?>
+                        if (isset($_SESSION['like'])) {
+                            echo count($_SESSION['like']);
+                        } else {
+                            echo "0"; // Mặc định là 0 nếu không có sản phẩm yêu thích
+                        }
+                        ?>
+                    </i>
+                </div>
 
-                    </i></div>
-                <div onclick="ajax_giohang()" style="cursor: pointer;"><i
-                        class="glyphicon glyphicon-shopping-cart navbar-right btn-lg" id="cart_count">
+                <div onclick="ajax_giohang()" style="cursor: pointer;">
+                    <i class="glyphicon glyphicon-shopping-cart navbar-right btn-lg" id="cart_count">
                         <?php
-          if($_SESSION['rights'] == "default"){
-            if(isset($_SESSION['client_cart'])){
-              echo count($_SESSION['client_cart'])-1;
+        if ($_SESSION['rights'] == "default") {
+            if (isset($_SESSION['client_cart'])) {
+                echo count($_SESSION['client_cart']);
             } else {
-              echo " 0";
+                echo "0";  // Mặc định là 0 nếu không có giỏ hàng
             }
-          } else {
-            echo count($_SESSION['user_cart'])-1;
-          }
-          ?>
-
-                    </i></div>
+        } else {
+            echo max(count($_SESSION['user_cart']) - 1, 0);  // Tránh số lượng giỏ hàng âm
+        }
+        ?>
+                    </i>
+                </div>
+                >
                 <div class="navbar-form navbar-right searchbox-desktop">
                     <div class="form-group">
                         <input type="text" class="form-control" placeholder="Bạn tìm gì?" id='srch-val'>
