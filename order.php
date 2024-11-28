@@ -69,7 +69,9 @@ window.onload = function() {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+                        <?php while ($row = mysqli_fetch_assoc($result)) { 
+                            $_SESSION['product_names'][] = $row['tensp']; // Lưu tên sản phẩm  
+                        ?>
                         <tr>
                             <td><img src="<?php echo $row['anhchinh'] ?>" style="width: 70px"></td>
                             <td><?php echo $row['tensp'] ?></td>
@@ -134,8 +136,31 @@ window.onload = function() {
                         }
                     ?>">
                 </div>
+
+                <!-- Thêm trường Email -->
+                <div class="form-group">
+                    <label for="">Email: </label>
+                    <input type="email" class="form-control" name="email" id="s_email" value="<?php 
+                        if($_SESSION['rights'] == 'user'){
+                            echo $_SESSION['user']['email'];
+                        }
+                    ?>">
+                </div>
+
+                <!-- Thêm trường Phương thức thanh toán -->
+                <div class="form-group">
+                    <label for="">Phương thức thanh toán: </label>
+                    <select class="form-control" name="payment_method" id="s_payment_method">
+                        <option value="COD">COD (Thanh toán khi nhận hàng)</option>
+                        <option value="Internet Banking">Internet Banking</option>
+                        <option value="Credit Card">Thẻ tín dụng</option>
+                    </select>
+                </div>
+
                 <button onclick="check_before_submit()" class="btn btn-primary" type="submit">Đặt Hàng</button><br><br>
             </div>
+
+
         </div>
     </div>
 </form>
