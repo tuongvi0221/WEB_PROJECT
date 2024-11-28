@@ -3,14 +3,14 @@ $(document).on("click", ".delete", function (e) {
     const masp = $(this).data("masp");
     const $productRow = $(this).closest('.d-flex'); // Lấy phần tử sản phẩm tương ứng
 
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+   
         $.post("backend-index.php", {
             query: "xoasanpham",
             masp: masp
         }, function (response) {
             if ($.isNumeric(response)) {
                 $("#cart_count").text(response.trim());
-                alert("Sản phẩm đã được xóa khỏi giỏ hàng!");
+               
 
                 // Xóa sản phẩm khỏi giao diện
                 $productRow.remove();
@@ -25,7 +25,7 @@ $(document).on("click", ".delete", function (e) {
         }).fail(function () {
             alert("Có lỗi xảy ra khi xóa sản phẩm!");
         });
-    }
+    
 });
 
 
@@ -43,34 +43,14 @@ $(document).ready(function () {
             // Cập nhật số lượng giỏ hàng dựa trên phản hồi
             $('#cart_count').html(response);
 
-            // Hiển thị thông báo thành công
-            alert('Sản phẩm đã được thêm vào giỏ hàng!');
         });
     });
 });
 
-$(document).on("click", ".like-container", function (e) {
-    e.preventDefault();
 
-    const masp = $(this).data("masp");
-
-    // Gửi yêu cầu AJAX để thêm sản phẩm vào danh sách yêu thích
-    $.post("backend-index.php", { action: "addtocartlike_action", masp: masp }, function (response) {
-        if ($.isNumeric(response)) {
-            // Nếu phản hồi là số, cập nhật số lượng sản phẩm yêu thích
-            $("#like_count").text(response.trim());
-
-            // Thêm class 'liked' để thay đổi kiểu dáng của icon (để hiển thị trạng thái đã yêu thích)
-            $(this).addClass('liked');
-            
-            alert("Đã thêm sản phẩm vào danh sách yêu thích!");
-        } else {
-            alert(response); // Hiển thị lỗi từ backend
-        }
-    }).fail(function () {
-        alert("Có lỗi xảy ra khi thêm sản phẩm vào yêu thích!");
+$(document).ready(function () {
+    // Lấy số lượng sản phẩm trong giỏ hàng
+    $.get('backend-index.php', { action: 'get_cart_count' }, function (response) {
+        $('#cart_count').html(response);
     });
 });
-
-
-

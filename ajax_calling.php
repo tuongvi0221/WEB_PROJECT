@@ -149,14 +149,13 @@ function php_saling() {
                         ?>'>
                     <i class='glyphicon glyphicon-heart unlike'></i>
                 </a>
-                <a class='btn btn-primary btn-md cart-container <?php
-                        if (isset($_SESSION['rights'])) {
-                            if ($_SESSION['rights'] == "default" && isset($_SESSION['client_cart']) && in_array($row['masp'], $_SESSION['client_cart'])) {
-                                echo 'cart-ordered';
-                            } elseif ($_SESSION['rights'] != "default" && isset($_SESSION['user_cart']) && in_array($row['masp'], $_SESSION['user_cart'])) {
-                                echo 'cart-ordered';
-                            }
-                        } ?>' onclick="addtocart_action(<?php echo $masp; ?>)">
+                <a class='btn btn-primary btn-md cart-container <?php 
+                                    if (($_SESSION['rights'] == "default" && in_array($row['masp'], $_SESSION['client_cart'])) || 
+                                        ($_SESSION['rights'] != "default" && in_array($row['masp'], $_SESSION['user_cart']))) {
+                                        echo 'cart-ordered';
+                                    }
+                                ?>' data-masp='<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'
+                    onclick="addtocart_action('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')">
                     <i title='Thêm vào giỏ hàng' class='glyphicon glyphicon-shopping-cart cart-item'></i>
                 </a>
                 <a class="snip0050" href='order.php?masp=<?php echo htmlspecialchars($row['masp'], ENT_QUOTES) ?>'>
@@ -240,11 +239,12 @@ function php_new() {
                     <i class='glyphicon glyphicon-heart unlike'></i>
                 </a>
                 <a class='btn btn-primary btn-md cart-container <?php 
-                            if (($_SESSION['rights'] == "default" && in_array($row['masp'], $_SESSION['client_cart'])) || 
-                                ($_SESSION['rights'] != "default" && in_array($row['masp'], $_SESSION['user_cart']))) {
-                                echo 'cart-ordered';
-                            }
-                        ?>' onclick="addtocart_action('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')">
+                                    if (($_SESSION['rights'] == "default" && in_array($row['masp'], $_SESSION['client_cart'])) || 
+                                        ($_SESSION['rights'] != "default" && in_array($row['masp'], $_SESSION['user_cart']))) {
+                                        echo 'cart-ordered';
+                                    }
+                                ?>' data-masp='<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'
+                    onclick="addtocart_action('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')">
                     <i title='Thêm vào giỏ hàng' class='glyphicon glyphicon-shopping-cart cart-item'></i>
                 </a>
                 <a class="snip0050" href='order.php?masp=<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'>
@@ -330,7 +330,8 @@ function php_buy() {
                                         ($_SESSION['rights'] != "default" && in_array($row['masp'], $_SESSION['user_cart']))) {
                                         echo 'cart-ordered';
                                     }
-                                ?>' onclick="addtocart_action('<?php echo htmlspecialchars($row['masp']); ?>')">
+                                ?>' data-masp='<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'
+                    onclick="addtocart_action('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')">
                     <i title='Thêm vào giỏ hàng' class='glyphicon glyphicon-shopping-cart cart-item'></i>
                 </a>
                 <a class="snip0050" href='order.php?masp=<?php echo htmlspecialchars($row['masp']); ?>'>
@@ -372,32 +373,94 @@ function php_danhmucsp() {
         case 'all':
             $sql = "SELECT * FROM sanpham sp, danhmucsp dm WHERE sp.madm = dm.madm ORDER BY sp.gia ASC";
             break;
+    
         case 'ao_khoac':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm WHERE sp.madm = dm.madm AND sp.masp IN (1,2,3,4,5,6) ORDER BY sp.gia ASC";
-            break; 
+            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
+                    WHERE sp.madm = dm.madm 
+                    AND sp.masp IN (
+                        SELECT masp FROM sanpham 
+                        WHERE madm IN (
+                            SELECT madm FROM danhmucsp WHERE tendm = 'Áo Khoác'
+                        )
+                    ) 
+                    ORDER BY sp.gia ASC";
+            break;
+    
         case 'ao_thun':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm WHERE sp.madm = dm.madm AND sp.masp IN(7,8,9,10,11,12) ORDER BY sp.gia ASC";
+            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
+                    WHERE sp.madm = dm.madm 
+                    AND sp.masp IN (
+                        SELECT masp FROM sanpham 
+                        WHERE madm IN (
+                            SELECT madm FROM danhmucsp WHERE tendm = 'Áo Thun'
+                        )
+                    ) 
+                    ORDER BY sp.gia ASC";
             break;
+    
         case 'ao_so_mi':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm WHERE sp.madm = dm.madm AND sp.masp IN(13,14,15,16,17,18) ORDER BY sp.gia ASC";
+            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
+                    WHERE sp.madm = dm.madm 
+                    AND sp.masp IN (
+                        SELECT masp FROM sanpham 
+                        WHERE madm IN (
+                            SELECT madm FROM danhmucsp WHERE tendm = 'Áo Sơ Mi'
+                        )
+                    ) 
+                    ORDER BY sp.gia ASC";
             break;
+    
         case 'ao_hoodie':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm WHERE sp.madm = dm.madm AND sp.masp IN(19,20,21,22,23,24) ORDER BY sp.gia ASC";
+            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
+                    WHERE sp.madm = dm.madm 
+                    AND sp.madm IN (
+                        SELECT madm FROM danhmucsp WHERE tendm = 'Áo Hoodie'
+                    ) 
+                    ORDER BY sp.gia ASC";
             break;
+    
         case 'quan':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm WHERE sp.madm = dm.madm AND sp.masp IN(25,26,27,28,29,30,31,32) ORDER BY sp.gia ASC";
+            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
+                    WHERE sp.madm = dm.madm 
+                    AND sp.masp IN (
+                        SELECT masp FROM sanpham 
+                        WHERE madm IN (
+                            SELECT madm FROM danhmucsp WHERE tendm = 'Quần'
+                        )
+                    ) 
+                    ORDER BY sp.gia ASC";
             break;
+    
         case 'dam':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm WHERE sp.madm = dm.madm AND sp.masp IN(33,34,35,36,37,38) ORDER BY sp.gia ASC";
+            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
+                    WHERE sp.madm = dm.madm 
+                    AND sp.masp IN (
+                        SELECT masp FROM sanpham 
+                        WHERE madm IN (
+                            SELECT madm FROM danhmucsp WHERE tendm = 'Đầm'
+                        )
+                    ) 
+                    ORDER BY sp.gia ASC";
             break;
+    
         case 'phu_kien':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm WHERE sp.madm = dm.madm AND sp.masp IN(39,40,41,42,43,44) ORDER BY sp.gia ASC";
+            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
+                    WHERE sp.madm = dm.madm 
+                    AND sp.masp IN (
+                        SELECT masp FROM sanpham 
+                        WHERE madm IN (
+                            SELECT madm FROM danhmucsp WHERE tendm = 'Phụ Kiện'
+                        )
+                    ) 
+                    ORDER BY sp.gia ASC";
             break;
+    
         default:
             echo "<p>Danh mục không hợp lệ.</p>";
             disconnect($conn);
             return;
     }
+    
 
     // Lưu lại truy vấn SQL ban đầu
     $sqlx = $sql;
@@ -677,13 +740,12 @@ function php_search() {
                     <i class='glyphicon glyphicon-heart unlike'></i>
                 </a>
                 <a class='btn btn-primary btn-md cart-container <?php 
-    if (isset($_SESSION['rights'])) {
-        if ($_SESSION['rights'] == "default" && isset($_SESSION['client_cart']) && in_array($masp, $_SESSION['client_cart'])) {
-            echo 'cart-ordered';
-        } elseif ($_SESSION['rights'] != "default" && isset($_SESSION['user_cart']) && in_array($masp, $_SESSION['user_cart'])) {
-            echo 'cart-ordered';
-        }
-    } ?>' data-masp='<?php echo $masp; ?>' onclick="addtocart_action('<?php echo $masp; ?>')">
+                                    if (($_SESSION['rights'] == "default" && in_array($row['masp'], $_SESSION['client_cart'])) || 
+                                        ($_SESSION['rights'] != "default" && in_array($row['masp'], $_SESSION['user_cart']))) {
+                                        echo 'cart-ordered';
+                                    }
+                                ?>' data-masp='<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'
+                    onclick="addtocart_action('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')">
                     <i title='Thêm vào giỏ hàng' class='glyphicon glyphicon-shopping-cart cart-item'></i>
                 </a>
 
@@ -702,10 +764,3 @@ function php_search() {
 ?>
 
 <script src="cart.js"></script> <!-- Đường dẫn tới file cart.js -->
-<script type="text/javascript">
-$(document).ready(function() {
-    $(".cart-container").click(function() {
-        $(this).toggleClass('cart-ordered');
-    });
-});
-</script>

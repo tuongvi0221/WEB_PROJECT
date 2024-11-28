@@ -133,14 +133,6 @@ function get_buy_the_most() {
 }
 
 
-
-
-
-
-
-
-
-
 //Gần đây nhất
 function get_the_most_recent() {
     // Kết nối cơ sở dữ liệu
@@ -269,55 +261,83 @@ switch ($q) {
 
 }
 
+function get_cart_count() {
+    session_start();
+    $conn = connect();
+
+    $cart_name = ($_SESSION['rights'] == "default") ? "client_cart" : "user_cart";
+    $count = 0;
+
+    if ($_SESSION['rights'] == "user") {
+        $user_id = $_SESSION['user']['id'];
+        $sql = "SELECT COUNT(*) as count FROM giohang WHERE user_id = '$user_id'";
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $data = mysqli_fetch_assoc($result);
+            $count = $data['count'];
+        }
+    } else {
+        $count = isset($_SESSION[$cart_name]) ? count($_SESSION[$cart_name]) : 0;
+    }
+
+    echo $count;
+}
+
 function addtocart_action() {
     session_start();
     $conn = connect(); // Kết nối cơ sở dữ liệu
 
-    // Kiểm tra và lấy mã sản phẩm từ POST
     $masp = isset($_POST['masp']) ? $_POST['masp'] : '';
     if (empty($masp)) {
         echo "Mã sản phẩm không hợp lệ!";
         exit;
     }
 
-    // Xác định giỏ hàng dựa trên quyền của người dùng
     $cart_name = ($_SESSION['rights'] == "default") ? "client_cart" : "user_cart";
 
-    // Khởi tạo giỏ hàng nếu chưa tồn tại
     if (!isset($_SESSION[$cart_name])) {
-        $_SESSION[$cart_name] = array(); // Tạo giỏ hàng nếu chưa có
+        $_SESSION[$cart_name] = array();
     }
 
-    // Tìm kiếm sản phẩm trong giỏ hàng
-    $pos = array_search($masp, $_SESSION[$cart_name]);
-
-    // Kiểm tra quyền của người dùng (Nếu là người dùng có quyền "user")
     if ($_SESSION['rights'] == "user") {
-        $user_id = $_SESSION['user']['id']; // Lấy ID người dùng từ session
+        $user_id = $_SESSION['user']['id'];
 
-        // Nếu sản phẩm đã có trong giỏ, chỉ hiển thị thông báo mà không thay đổi gì
-        if ($pos !== false) {
-            echo count($_SESSION[$cart_name]); // Trả về số lượng sản phẩm trong giỏ hàng
-            exit;
+        $sql_check = "SELECT * FROM giohang WHERE user_id = '$user_id' AND masp = '$masp'";
+        $result_check = mysqli_query($conn, $sql_check);
+
+        if (mysqli_num_rows($result_check) > 0) {
+            // Nếu sản phẩm đã tồn tại, chỉ cần tăng số lượng
+            $sql_update = "UPDATE giohang SET soluong = soluong + 1 WHERE user_id = '$user_id' AND masp = '$masp'";
+            mysqli_query($conn, $sql_update);
         } else {
-            // Nếu sản phẩm chưa có trong giỏ, thêm sản phẩm vào cơ sở dữ liệu
-            $sql = "INSERT INTO giohang (user_id, masp, soluong) VALUES ('$user_id', '$masp', 1)";
+            // Thêm sản phẩm mới vào giỏ
+            $sql_insert = "INSERT INTO giohang (user_id, masp, soluong) VALUES ('$user_id', '$masp', 1)";
+            mysqli_query($conn, $sql_insert);
         }
 
-        // Thực thi truy vấn SQL
-        $result = mysqli_query($conn, $sql);
-        if (!$result) {
-            echo "Lỗi khi thêm sản phẩm trong giỏ hàng cơ sở dữ liệu: " . mysqli_error($conn);
+        // Cập nhật session từ cơ sở dữ liệu
+        $sql_cart = "SELECT masp FROM giohang WHERE user_id = '$user_id'";
+        $result_cart = mysqli_query($conn, $sql_cart);
+
+        // Khởi tạo lại session giỏ hàng
+        $_SESSION[$cart_name] = []; 
+
+        if ($result_cart) {
+            while ($row = mysqli_fetch_assoc($result_cart)) {
+                $_SESSION[$cart_name][] = $row['masp']; // Đồng bộ tất cả sản phẩm vào session
+            }
+        }
+
+    } else {
+        // Xử lý cho người dùng không đăng nhập
+        if (!in_array($masp, $_SESSION[$cart_name])) {
+            $_SESSION[$cart_name][] = $masp;
         }
     }
 
-    // Cập nhật giỏ hàng trong session và trả về số lượng sản phẩm
-    if ($pos === false) {
-        $_SESSION[$cart_name][] = $masp; // Thêm sản phẩm vào giỏ hàng
-    }
-    
-    echo count($_SESSION[$cart_name]); // Trả về số lượng sản phẩm trong giỏ hàng
+    echo count($_SESSION[$cart_name] + 1);
 }
+
   
 function xoasanpham() {
     session_start();
