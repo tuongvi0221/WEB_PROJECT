@@ -21,3 +21,19 @@ document.getElementById("anhchinh").addEventListener("change", function (event) 
         reader.readAsDataURL(file);
     }
 });
+
+$(document).ready(function() {
+    // Khi người dùng chọn một danh mục sản phẩm
+    $('#category-select').change(function() {
+        var categoryId = $(this).val(); // Lấy giá trị danh mục đã chọn
+
+        // Gửi yêu cầu đến server nếu có chọn danh mục
+        if (categoryId) {
+            $.get('fetch_products_by_category.php', { category_id: categoryId }, function(response) {
+                $('#product-list').html(response); // Hiển thị kết quả vào tbody của bảng
+            });
+        } else {
+            $('#product-list').html(''); // Nếu không chọn danh mục, xóa danh sách sản phẩm
+        }
+    });
+});

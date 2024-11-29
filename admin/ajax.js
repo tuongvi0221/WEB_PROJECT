@@ -1,36 +1,3 @@
-function them_sp() {
-    var formData = new FormData($("#add-product-form")[0]);
-
-    // Kiểm tra tên sản phẩm và giá
-    var tensp = $('#tensp').val();
-    var gia = $('#gia').val();
-
-    if (tensp == "" || gia == "") {
-        alert("Tên sản phẩm và giá không được để trống!");
-        return;
-    }
-
-    $.ajax({
-        url: "for-ajax.php",  // Đảm bảo rằng đường dẫn đúng
-        type: "POST",
-        data: formData,
-        dataType: "text",
-        contentType: false,  // Không tự động định dạng lại dữ liệu
-        processData: false,  // Không xử lý dữ liệu tự động
-        success: function(result) {
-            $("#sp_error").html(result);
-            if (result.indexOf("Thêm sản phẩm thành công") !== -1) {
-                // Reload lại trang khi thêm sản phẩm thành công
-                window.location.reload();
-            }
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.error("AJAX error:", textStatus, errorThrown);
-        }
-    });
-}
-
-
 
 function xoa_sp(masp_xoa){
 	var q = 'xoa_sp';
@@ -151,16 +118,20 @@ function them_admin(){
 	var ten = $('#admin-name').val();
 	var tentk = $('#admin-username').val();
 	var mk = $('#admin-password').val();
+	var diachi = $('#admin-address').val();
+	var sdt = $('#admin-phonenumber').val();
+	var email = $('#admin-email').val();
+
 	$.ajax({
 		url : "for-ajax.php",
 		type : "post",
 		dataType:"text",
 		data : {
-			q, ten, tentk, mk
+			q, ten, tentk, mk, diachi, sdt, email
 		},
 		success : function (result){
 			$('#tbl-thanhvien-list').html(result);
-			location.reload();
+			
 		}
 	});
 }
@@ -182,8 +153,7 @@ function xoa_taikhoan(id_tk_xoa){
 function display_edit_sanpham(masp_sua_sp){
 	$('#sua_sp-area').show(300);
 	$('#edit_sp_btn').attr("onclick","sua_sp('"+masp_sua_sp+"')");
-/*	$('#tbl-sanpham-list').toggle(300);
-	$('#loadmorebtn').toggle();*/
+
 }
 function sua_sp(masp_sua){
 	var q = 'sua_sp';

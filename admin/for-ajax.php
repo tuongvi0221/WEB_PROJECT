@@ -119,9 +119,6 @@ function load_more_gd(){
 }
 
 switch ($q) {
-	case 'them_sp':
-	them_sp();
-	break;
 	case 'xoa_sp':
 	xoa_sp();
 	break;
@@ -152,67 +149,6 @@ switch ($q) {
 	case 'sua_sp':
 	sua_sp();
 	break;
-}
-function them_sp(){
-	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-		$tensp = $_POST['tensp'];
-		$gia = $_POST['gia'];
-		$danhcho = $_POST['danhcho'];
-		$khuyenmai = $_POST['khuyenmai'];
-		$madm = $_POST['madm'];
-	
-		// Kiểm tra ảnh
-		if (isset($_FILES['anhchinh']) && $_FILES['anhchinh']['error'] == 0) {
-			$target_dir = "images/"; // Đường dẫn thư mục chứa ảnh
-			$target_file = $target_dir . basename($_FILES["anhchinh"]["name"]);
-			$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-	
-			// Kiểm tra loại file ảnh
-			$allowed_types = ['jpg', 'png', 'jpeg', 'gif'];
-			if (in_array($imageFileType, $allowed_types)) {
-				if (move_uploaded_file($_FILES["anhchinh"]["tmp_name"], $target_file)) {
-					$anhchinh = $target_file; // Lưu đường dẫn ảnh
-				} else {
-					echo "Có lỗi khi tải ảnh lên.";
-					exit;
-				}
-			} else {
-				echo "Chỉ hỗ trợ ảnh JPG, PNG, JPEG, GIF.";
-				exit;
-			}
-		} else {
-			echo "Vui lòng chọn ảnh.";
-			exit;
-		}
-	
-		// Kết nối cơ sở dữ liệu
-		$conn = connect();
-	
-		// Làm sạch dữ liệu đầu vào
-		$tensp = validate_input_sql($conn, $tensp);
-		$gia = validate_input_sql($conn, $gia);
-		$danhcho = validate_input_sql($conn, $danhcho);
-		$khuyenmai = validate_input_sql($conn, $khuyenmai);
-		$madm = validate_input_sql($conn, $madm);
-	
-		// Thêm sản phẩm vào cơ sở dữ liệu
-		$now = date('d-m-Y h:i:s');
-		$luotmua = rand(200, 1000);
-		$luotxem = rand(1001, 5000);
-		
-		$sql = "INSERT INTO sanpham (tensp, gia, danhcho, khuyenmai, madm, anhchinh, luotmua, luotxem, ngaytao) 
-				VALUES ('$tensp', '$gia', '$danhcho', '$khuyenmai', '$madm', '$anhchinh', '$luotmua', '$luotxem', '$now')";
-	
-		if (mysqli_query($conn, $sql)) {
-			echo "Thêm sản phẩm thành công";
-		} else {
-			echo "Có lỗi khi thêm sản phẩm vào cơ sở dữ liệu.";
-		}
-	
-		// Đóng kết nối
-		disconnect($conn);
-	}
-	
 }
 
 
@@ -412,19 +348,41 @@ function giaodich_xong(){
 	}
 	disconnect($conn);
 }
-function them_admin(){
-	$conn = connect();
-	$ten = $_POST['ten'];
-	$tentk = $_POST['tentk'];
-	$mk = $_POST['mk'];
-	$sql = "INSERT INTO thanhvien VALUES ('','".$ten."','".$tentk."','".$mk."','','','','','1')";
-	if(!mysqli_query($conn, $sql)){
-		echo "<script>alert('Tên tài khoản đã tồn tại!')</script>";
-	} else {
-		echo "<script>alert('Tạo thành công!')</script>";
-	}
-	disconnect($conn);
+
+function them_admin() {
+    $conn = connect();
+
+    // Kiểm tra và nhận dữ liệu từ AJAX
+    $ten = isset($_POST['ten']) ? mysqli_real_escape_string($conn, $_POST['ten']) : null;
+    $tentk = isset($_POST['tentk']) ? mysqli_real_escape_string($conn, $_POST['tentk']) : null;
+    $mk = isset($_POST['mk']) ? mysqli_real_escape_string($conn, $_POST['mk']) : null;
+    $diachi = isset($_POST['diachi']) ? mysqli_real_escape_string($conn, $_POST['diachi']) : null;
+    $sdt = isset($_POST['sdt']) ? mysqli_real_escape_string($conn, $_POST['sdt']) : null;
+    $email = isset($_POST['email']) ? mysqli_real_escape_string($conn, $_POST['email']) : null;
+
+    // Gán ngày tạo bằng ngày hiện tại
+    $ngaytao = date('Y-m-d H:i:s'); // Định dạng: Năm-Tháng-Ngày Giờ:Phút:Giây
+
+    // Kiểm tra nếu các trường bắt buộc bị bỏ trống
+    if (!$ten || !$tentk || !$mk) {
+        echo "Tên, tên tài khoản và mật khẩu là bắt buộc!";
+        exit;
+    }
+
+    // Tạo câu lệnh SQL
+    $sql = "INSERT INTO thanhvien (ten, tentaikhoan, matkhau, diachi, sodt, email, ngaytao, quyen) 
+            VALUES ('$ten', '$tentk', '$mk', '$diachi', '$sdt', '$email', '$ngaytao', '1')";
+
+    // Thực thi và kiểm tra lỗi
+    if (!mysqli_query($conn, $sql)) {
+        echo "<script>alert('Tên tài khoản đã tồn tại hoặc xảy ra lỗi!')</script>";
+    } else {
+        echo "<script>alert('Tạo thành công!')</script>";
+    }
+
+    disconnect($conn);
 }
+
 function xoa_taikhoan(){
 	$id = $_POST['id_tk_xoa'];
 	$conn = connect();

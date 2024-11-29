@@ -35,6 +35,8 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
     <script src="../libs/jquery/jquery-latest.js"></script>
     <script src="../libs/bootstrap/js/bootstrap.min.js"></script>
     <script src="ajax.js"></script>
+    <script src="search-product.js"></script>
+
     <script type="text/javascript">
     $(document).ready(function() {
         $('#add-pr').hide();
@@ -56,6 +58,25 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
         });
         $('#add-admin-btn').click(function() {
             $('#add-admin-area').toggle(300);
+        });
+
+        // Khi người dùng chọn một danh mục sản phẩm
+        $('#category-select').change(function() {
+            var categoryId = $(this).val(); // Lấy giá trị danh mục đã chọn
+
+            // Gửi yêu cầu đến server nếu có chọn danh mục
+            if (categoryId) {
+                $.get('fetch_products_by_category.php', {
+                    category_id: categoryId
+                }, function(response) {
+                    $('#product-list').html(response); // Hiển thị kết quả vào tbody của bảng
+                });
+            } else {
+                $('#product-list').html(''); // Nếu không chọn danh mục, xóa danh sách sản phẩm
+            }
+
+            $('#tbl-sanpham-list').hide(300);
+            $('#loadmorebtn').hide(300);
         });
     });
 
@@ -131,200 +152,307 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="sanpham">
                     <div class="container-fluid">
-                        <h3>Danh sách sản phẩm</h3>
-                        <span class="glyphicon glyphicon-plus btn btn-success pull-right" id="addspbtn"
-                            style="z-index: 2;"></span>
-                        <div class="container-fluid">
-                            <div id='sua_sp-area'>
-                                <h4>Sửa Sản Phẩm</h4>
-                                <label>Tên sản phẩm</label>
-                                <input type="text" id='tensp-edit' class="form-control">
-                                <label>Giá</label>
-                                <input type="text" id='gia-edit' class="form-control">
-                                <label>Khuyến mãi</label>
-                                <input type="text" id='khuyenmai-edit' class="form-control">
-                                <span class="btn btn-success" id="edit_sp_btn">Xong</span>
-                                <span class="btn btn-default" onclick="$('#sua_sp-area').hide(300)">Hủy</span>
-                            </div>
+                        <h3 class="text-center text-primary mb-4">Quản lý sản phẩm</h3>
+                        <!-- Nút thêm sản phẩm -->
+                        <div class="d-flex justify-content-end mb-3">
+                            <button class="btn btn-success" id="addspbtn">
+                                <i class="glyphicon glyphicon-plus"></i> Thêm sản phẩm
+                            </button>
+                        </div>
 
-                            <table class="table table-hover" id="tbl-sanpham-list">
-                                <?php require_once 'function.php'; product_list(); ?>
-                                <div class="container-fluid text-center lmbtnctn">
-                                    <button onclick="load_more(0,'body-sp-list','sp')" id="loadmorebtn">Load
-                                        more</button>
-                                </div>
+                        <!-- Combobox hiển thị danh mục sản phẩm -->
+                        <div id="category-dropdown">
+                            <label for="category-select">Chọn loại sản phẩm:</label>
+                            <select id="category-select" class="form-control" name="category_id">
+                                <option value="">Tất cả các loại sản phẩm</option>
+                                <?php 
+                                // Kết nối cơ sở dữ liệu và lấy danh mục sản phẩm
+                                require_once 'function.php'; 
+                                $conn = connect();
+                                mysqli_set_charset($conn, 'utf8');
+                                $sql = "SELECT madm, tendm FROM danhmucsp"; // Lấy mã và tên danh mục
+                                $result = mysqli_query($conn, $sql);
+                                while ($row = mysqli_fetch_assoc($result)) {
+                                    $category_id = htmlspecialchars($row['madm']);
+                                    $category_name = htmlspecialchars($row['tendm']);
+                                    echo "<option value='$category_id'>$category_name</option>";
+                                }
+                                disconnect($conn);
+                                ?>
+                            </select>
+                        </div>
+
+                        <!-- Danh sách sản phẩm -->
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered" id="tbl-sanpham-combobox">
+                                <thead>
+                                    <tr>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Giá</th>
+                                        <th>Hình ảnh</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="product-list">
+                                    <!-- Sản phẩm sẽ được hiển thị ở đây -->
+                                </tbody>
                             </table>
-
+                            <div class="text-center mt-3">
+                                <button class="btn btn-primary" onclick="load_more(0,'body-sp-list','sp')"
+                                    id="loadmorebtn">Tải thêm</button>
+                            </div>
                         </div>
-                        <!-- VÙNG LÀM VIỆC -->
-                        <div class="work-space">
-                            <!-- Thêm sản phẩm -->
-                            <div id="add-pr" class="card shadow-sm p-4 mb-4">
-                                <h3 class="text-center text-primary mb-4">Thêm sản phẩm</h3>
-                                <form method="POST" action="add-product.post.php" id="add-product-form"
-                                    enctype="multipart/form-data">
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="tensp" class="form-label">Tên sản phẩm</label>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <input type="text" class="form-control" id="tensp" name="tensp"
-                                                placeholder="Nhập tên sản phẩm">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="gia" class="form-label">Giá</label>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <input type="number" class="form-control" id="gia" name="gia"
-                                                placeholder="Nhập giá sản phẩm">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="danhcho" class="form-label">Dành cho</label>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <input type="text" class="form-control" id="danhcho" name="danhcho"
-                                                placeholder="Dành cho nam/nữ">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="khuyenmai" class="form-label">Khuyến mãi</label>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <input type="text" class="form-control" id="khuyenmai" name="khuyenmai"
-                                                placeholder="Thông tin khuyến mãi">
-                                        </div>
-                                    </div>
 
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="chatlieu" class="form-label">Chất liệu</label>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <input type="text" class="form-control" id="chatlieu" name="chatlieu"
-                                                placeholder="Bạc, Inox, Vàng,...">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="mau" class="form-label">Màu sắc</label>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <input type="text" class="form-control" id="mau" name="mau"
-                                                placeholder="Đen, trắng,...">
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="madm" class="form-label">Loại</label>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <?php
-                                            // Gọi hàm displayCategorySelect() để hiển thị combobox danh mục sản phẩm
-                                            displayCategorySelect();
-                                            ?>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label for="anhchinh" class="form-label">Hình ảnh</label>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <input type="file" class="form-control" id="anhchinh" name="anhchinh"
-                                                accept="image/*">
-                                        </div>
-                                    </div>
-                                    <div class="text-center">
-                                        <button type="submit" name="submit">Thêm sản phẩm</button>
-                                        <button type="button" class="btn btn-danger"
-                                            onclick="$('#add-pr').toggle(300);$('#tbl-sanpham-list').toggle(300);">Hủy</button>
-                                        <div id="sp_error" class="text-danger mt-2"></div>
-                                    </div>
-                                </form>
-
+                        <!-- Form sửa sản phẩm -->
+                        <div id='sua_sp-area' class="card shadow-sm p-4 mb-4 d-none">
+                            <h4 class="text-center text-warning mb-4">Sửa Sản Phẩm</h4>
+                            <div class="mb-3">
+                                <label for="tensp-edit" class="form-label">Tên sản phẩm</label>
+                                <input type="text" id='tensp-edit' class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="gia-edit" class="form-label">Giá</label>
+                                <input type="text" id='gia-edit' class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="khuyenmai-edit" class="form-label">Khuyến mãi</label>
+                                <input type="text" id='khuyenmai-edit' class="form-control">
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-success me-2" id="edit_sp_btn">Xong</button>
+                                <button class="btn btn-secondary" onclick="$('#sua_sp-area').hide(300)">Hủy</button>
                             </div>
                         </div>
 
 
+                        <!-- Danh sách sản phẩm -->
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered" id="tbl-sanpham-list">
+                                <?php require_once 'function.php'; product_list(); ?>
+                            </table>
+                            <div class="text-center mt-3">
+                                <button class="btn btn-primary" onclick="load_more(0,'body-sp-list','sp')"
+                                    id="loadmorebtn">Tải thêm</button>
+                            </div>
+                        </div>
+
+                        <!-- Form thêm sản phẩm -->
+                        <div id="add-pr" class="card shadow-sm p-4 mb-4 d-none">
+                            <h3 class="text-center text-primary mb-4">Thêm sản phẩm</h3>
+                            <form method="POST" action="add-product.post.php" id="add-product-form"
+                                enctype="multipart/form-data">
+                                <div class="row mb-3">
+                                    <label for="tensp" class="col-md-4 col-form-label">Tên sản phẩm</label>
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" id="tensp" name="tensp"
+                                            placeholder="Nhập tên sản phẩm">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="gia" class="col-md-4 col-form-label">Giá</label>
+                                    <div class="col-md-8">
+                                        <input type="number" class="form-control" id="gia" name="gia"
+                                            placeholder="Nhập giá sản phẩm">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="danhcho" class="col-md-4 col-form-label">Dành cho</label>
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" id="danhcho" name="danhcho"
+                                            placeholder="Dành cho nam/nữ">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="khuyenmai" class="col-md-4 col-form-label">Khuyến mãi</label>
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" id="khuyenmai" name="khuyenmai"
+                                            placeholder="Thông tin khuyến mãi">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="chatlieu" class="col-md-4 col-form-label">Chất liệu</label>
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" id="chatlieu" name="chatlieu"
+                                            placeholder="Bạc, Inox, Vàng,...">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="mau" class="col-md-4 col-form-label">Màu sắc</label>
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" id="mau" name="mau"
+                                            placeholder="Đen, trắng,...">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="madm" class="col-md-4 col-form-label">Loại</label>
+                                    <div class="col-md-8">
+                                        <?php displayCategorySelect(); ?>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="anhchinh" class="col-md-4 col-form-label">Hình ảnh</label>
+                                    <div class="col-md-8">
+                                        <input type="file" class="form-control" id="anhchinh" name="anhchinh"
+                                            accept="image/*">
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-success">Thêm sản phẩm</button>
+                                    <button type="button" class="btn btn-danger"
+                                        onclick="$('#add-pr').hide(300);$('#tbl-sanpham-list').show(300);">Hủy</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
+
 
 
 
                 <!-- THÀNH VIÊN -->
                 <div role="tabpanel" class="tab-pane" id="thanhvien">
-                    <h3>Danh sách thành viên</h3>
-                    <span class="btn btn-success" id="add-admin-btn"><i class="glyphicon glyphicon-plus"></i> Thêm
-                        admin</span>
-                    <div id="add-admin-area" class="form-inline">
-                        <h3>Thêm Admin</h3>
-                        <label>Tên:</label>
-                        <input type="text" class="form-control" id="admin-name">
+                    <div class="container-fluid py-4">
+                        <h3 class="text-primary text-center mb-4">Danh sách thành viên</h3>
+                        <div class="d-flex justify-content-end mb-3">
+                            <button class="btn btn-success" id="add-admin-btn">
+                                <i class="glyphicon glyphicon-plus"></i> Thêm admin
+                            </button>
+                        </div>
+                        <div id="add-admin-area" class="card shadow-sm p-4 mb-4 d-none">
+                            <h4 class="text-primary mb-4">Thêm Admin</h4>
+                            <form id="add-admin-form" class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="admin-name" class="form-label">Tên</label>
+                                    <input type="text" class="form-control" id="admin-name" placeholder="Nhập tên"
+                                        required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="admin-username" class="form-label">Tên tài khoản</label>
+                                    <input type="text" class="form-control" id="admin-username"
+                                        placeholder="Nhập tên tài khoản" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="admin-password" class="form-label">Mật khẩu</label>
+                                    <input type="password" class="form-control" id="admin-password"
+                                        placeholder="Nhập mật khẩu" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="admin-address" class="form-label">Địa chỉ</label>
+                                    <input type="text" class="form-control" id="admin-address"
+                                        placeholder="Nhập địa chỉ">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="admin-phonenumber" class="form-label">Số điện thoại</label>
+                                    <input type="text" class="form-control" id="admin-phonenumber"
+                                        placeholder="Nhập số điện thoại">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="admin-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="admin-email" placeholder="Nhập email">
+                                </div>
+                                <div class="col-12 text-center mt-4">
+                                    <button type="button" class="btn btn-success" onclick="them_admin()">Tạo</button>
+                                    <button type="button" class="btn btn-danger"
+                                        onclick="$('#add-admin-area').toggleClass('d-none')">Hủy</button>
+                                </div>
+                            </form>
 
-                        <label>Tên tài khoản:</label>
-                        <input type="text" class="form-control" id="admin-username">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered table-striped align-middle"
+                                id="tbl-thanhvien-list">
+                                <thead class="table-dark">
 
-                        <label>Mật khẩu:</label>
-                        <input type="password" class="form-control" id="admin-password">
-
-                        <span class="btn btn-success" onclick="them_admin()">Tạo</span>
-                        <span class="btn btn-default" onclick="$('#add-admin-area').toggle(300)">Hủy</span><br>
-                    </div>
-                    <div class="container-fluid">
-                        <table class="table table-hover" id="tbl-thanhvien-list">
-                            <?php require_once 'function.php'; member_list(); ?>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    <?php require_once 'function.php'; member_list(); ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
 
 
 
                 <!-- GIAO DỊCH -->
                 <div role="tabpanel" class="tab-pane" id="giaodich">
-                    <h3>DANH SÁCH GIAO DỊCH</h3>
-                    <span class="btn btn-info" onclick="list_chuagh()">Chưa giao hàng</span>
-                    <span class="btn btn-info" onclick="list_dagh()">Đã giao hàng</span>
-                    <span class="btn btn-info" onclick="list_tatcagh()">Tất cả</span>
-                    <h4><b>Sắp xếp theo: </b><span id="loai_gd">Chưa giao hàng</span></h4>
-                    <div class="container-fluid" style="padding-bottom: 20px;">
-                        <table class="table table-hover" id="tbl-giaodich-list">
-                            <?php require_once 'function.php'; exchange_list(); ?>
-                        </table>
+                    <div class="container-fluid py-4">
+                        <h3 class="text-center text-primary mb-4">Danh Sách Giao Dịch</h3>
+                        <div class="d-flex justify-content-center mb-3">
+                            <button class="btn btn-info mx-2" onclick="list_chuagh()">Chưa giao hàng</button>
+                            <button class="btn btn-info mx-2" onclick="list_dagh()">Đã giao hàng</button>
+                            <button class="btn btn-info mx-2" onclick="list_tatcagh()">Tất cả</button>
+                        </div>
+                        <h5 class="text-center">
+                            <b>Sắp xếp theo: </b><span id="loai_gd" class="text-success">Chưa giao hàng</span>
+                        </h5>
+                        <div class="table-responsive mt-4">
+                            <table class="table table-hover table-bordered table-striped align-middle"
+                                id="tbl-giaodich-list">
+                                <thead class="table-dark">
+                                </thead>
+                                <tbody>
+                                    <?php require_once 'function.php'; exchange_list(); ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
 
 
 
                 <!-- DANH MỤC -->
                 <div role="tabpanel" class="tab-pane" id="danhmuc">
-                    <h3>DANH MỤC SẢN PHẨM</h3>
-                    <div class="container">
-                        <div class="form-inline" id="add-dm">
-                            <h3>Thêm Danh Mục</h3>
-                            <label>Tên danh mục:</label>
-                            <input type="text" class="form-control" id="tendm">
+                    <div class="container py-4">
+                        <h3 class="text-center text-primary mb-4">Danh Mục Sản Phẩm</h3>
 
-                            <label>Xuất xứ</label>
-                            <input type="text" class="form-control" id="xuatsu">
-
-                            <span class="btn btn-success" onclick="them_dm()">Thêm</span>
-                            <span class="btn btn-default" onclick="$('#add-dm').toggle(300);">Hủy</span>
+                        <!-- Form Thêm Danh Mục -->
+                        <div id="add-dm" class="card shadow-sm p-4 mb-4">
+                            <h4 class="text-center text-success mb-3">Thêm Danh Mục</h4>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="tendm" class="form-label">Tên danh mục:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" id="tendm" placeholder="Nhập tên danh mục">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="xuatsu" class="form-label">Xuất xứ:</label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" id="xuatsu" placeholder="Nhập xuất xứ">
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button class="btn btn-success" onclick="them_dm()">Thêm</button>
+                                <button class="btn btn-danger" onclick="$('#add-dm').toggle(300);">Hủy</button>
+                            </div>
                         </div>
 
-                        <table class="table table-hover">
-                            <?php require_once 'function.php'; type_list(); ?>
-                            <h3 class="glyphicon glyphicon-plus btn btn-success pull-right" id="adddmbtn"></h3>
-                        </table>
+                        <!-- Danh Sách Danh Mục -->
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered table-striped align-middle">
+                                <thead class="table-dark">
+                                </thead>
+                                <tbody>
+                                    <?php require_once 'function.php'; type_list(); ?>
+                                </tbody>
+                            </table>
+                        </div>
 
+                        <!-- Nút Thêm Danh Mục -->
+                        <div class="text-center mt-4">
+                            <button id="adddmbtn" class="btn btn-primary" onclick="$('#add-dm').toggle(300);">
+                                <i class="glyphicon glyphicon-plus"></i> Thêm Danh Mục
+                            </button>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

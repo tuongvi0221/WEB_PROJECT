@@ -203,6 +203,10 @@ INSERT INTO sanphamyeuthich (user_id, masp) VALUES
 (2, 5)  
 ON DUPLICATE KEY UPDATE id=id; -- Không thêm nếu đã có
 
+ALTER TABLE thanhvien MODIFY diachi VARCHAR(255) NULL;
+ALTER TABLE thanhvien MODIFY sodt VARCHAR(15) NULL;
+ALTER TABLE thanhvien MODIFY email VARCHAR(100) NULL;
+
 
 -- LỊCH SỬ MUA HÀNG
 -- Tạo bảng lịch sử mua hàng
