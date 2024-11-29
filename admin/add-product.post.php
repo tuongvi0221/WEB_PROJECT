@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $danhcho = $_POST['danhcho'];
     $khuyenmai = $_POST['khuyenmai'];
     $madm = $_POST['madanhmuc'];  // Lấy mã danh mục được chọn
+    $chatlieu = $_POST['chatlieu'];  // Lấy mã danh mục được chọn
+    $mau = $_POST['mau'];  // Lấy mã danh mục được chọn
     $anhchinh = '';
 
     // Kiểm tra và xử lý hình ảnh tải lên
@@ -35,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Tiến hành upload ảnh
             if (move_uploaded_file($_FILES["anhchinh"]["tmp_name"], $target_file)) {
-                $anhchinh = $target_file;  // Lưu đường dẫn ảnh
+                $anhchinh = 'admin/' . $target_file;  // Lưu đường dẫn ảnh
             } else {
                 echo "Có lỗi khi tải ảnh lên.";
                 exit;
@@ -58,6 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $danhcho = validate_input_sql($conn, $danhcho);
     $khuyenmai = validate_input_sql($conn, $khuyenmai);
     $madm = validate_input_sql($conn, $madm);
+    $chatlieu = validate_input_sql($conn, $chatlieu);
+    $mau = validate_input_sql($conn, $mau);
 
     // Thêm sản phẩm vào cơ sở dữ liệu
     $now = date('d-m-Y h:i:s');
@@ -65,9 +69,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $luotxem = rand(1001, 5000);
 
     // Chuẩn bị câu lệnh SQL để thêm sản phẩm vào cơ sở dữ liệu
-    $stmt = $conn->prepare("INSERT INTO sanpham (tensp, gia, danhcho, khuyenmai, madm, anhchinh, luotmua, luotxem, ngaytao) 
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssssss", $tensp, $gia, $danhcho, $khuyenmai, $madm, $anhchinh, $luotmua, $luotxem, $now);
+    $stmt = $conn->prepare("INSERT INTO sanpham (tensp, gia, danhcho, khuyenmai,chatlieu, mau, madm, anhchinh, luotmua, luotxem, ngaytao) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)");
+    $stmt->bind_param("sssssssssss", $tensp, $gia, $danhcho, $khuyenmai, $chatlieu, $mau , $madm, $anhchinh, $luotmua, $luotxem, $now);
 
     // Thực thi câu lệnh
     if ($stmt->execute()) {

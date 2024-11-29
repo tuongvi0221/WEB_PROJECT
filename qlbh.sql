@@ -202,3 +202,75 @@ INSERT INTO sanphamyeuthich (user_id, masp) VALUES
 (3, 4),  
 (2, 5)  
 ON DUPLICATE KEY UPDATE id=id; -- Không thêm nếu đã có
+
+
+-- LỊCH SỬ MUA HÀNG
+-- Tạo bảng lịch sử mua hàng
+CREATE TABLE `lich_su_mua_hang` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `ngay_dat` DATE,  -- Ngày đặt hàng
+    `ngay_du_kien_nhan` DATE,  -- Ngày dự kiến nhận hàng
+    `tong_tien` int,
+    `user_id` int, 
+    `trang_thai` ENUM('Đã nhận', 'Chờ nhận', 'Yêu cầu trả', 'Giỏ hàng') NOT NULL  ,-- Trạng thái đơn hàng
+FOREIGN KEY (user_id) REFERENCES thanhvien(id) ON DELETE CASCADE 
+);
+
+CREATE TABLE `lich_su_mua_hang_sanpham` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `sanpham_id` int,  -- Ngày đặt hàng
+    `soluong` int ,
+    `maLSmuahang` int,
+FOREIGN KEY (maLSmuahang) REFERENCES lich_su_mua_hang(id) ON DELETE CASCADE, 
+FOREIGN KEY (sanpham_id) REFERENCES sanpham(masp) ON DELETE CASCADE 
+);
+
+
+-- Tạo bảng giao dịch (giả sử bảng giao dịch có mã giao dịch và trạng thái)
+CREATE TABLE `giao_dich` (
+    `ma_giao_dich` INT AUTO_INCREMENT PRIMARY KEY,
+    `ma_sp` VARCHAR(50) NOT NULL,  -- Mã sản phẩm
+    `trang_thai` ENUM('0', '1') NOT NULL  -- Trạng thái giao dịch (0: chưa giao, 1: đã giao)
+);
+
+
+-- Trigger kiểm tra yêu cầu trả hàng
+DELIMITER $$
+
+
+CREATE TRIGGER trg_check_return_request
+BEFORE UPDATE ON lich_su_mua_hang
+FOR EACH ROW
+BEGIN
+    -- Kiểm tra điều kiện trả hàng
+    IF NEW.trang_thai = 'Yêu cầu trả hàng' THEN
+        -- Kiểm tra ngày hiện tại so với ngày dự kiến nhận hàng
+        IF DATEDIFF(CURDATE(), NEW.ngay_du_kien_nhan) > 3 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Không thể yêu cầu hoàn trả vì đã quá 3 ngày kể từ ngày dự kiến nhận hàng';
+        END IF;
+    END IF;
+END$$
+
+
+DELIMITER ;
+
+
+
+-- Trigger thay đổi trạng thái giao dịch sau khi đặt hàng
+DELIMITER $$
+
+CREATE TRIGGER cap_nhat_trang_thai_giao_dich
+AFTER INSERT ON `lich_su_mua_hang`
+FOR EACH ROW
+BEGIN
+    DECLARE ngay_hien_tai DATE;
+    SET ngay_hien_tai = CURDATE();
+
+    -- Nếu ngày hiện tại đã qua 3 ngày từ ngày dự kiến nhận, cập nhật trạng thái giao dịch
+    IF DATEDIFF(NEW.ngay_du_kien_nhan, ngay_hien_tai) <= 3 THEN
+        UPDATE giao_dich SET trang_thai = 1 WHERE ma_giao_dich = NEW.ma_sp;
+    END IF;
+END$$
+
+DELIMITER ;

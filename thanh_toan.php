@@ -1,27 +1,41 @@
 <?php
-session_start();
-require_once 'backend-index.php';
-// Kết nối cơ sở dữ liệu
-$conn = connect();
-mysqli_set_charset($conn, 'utf8');
-// Nhận dữ liệu từ form
-$masp = mysqli_real_escape_string($conn, $_POST['masp']);
-$tensp = mysqli_real_escape_string($conn, $_POST['tensp']);
-$gia = mysqli_real_escape_string($conn, $_POST['gia']);
-$khuyenmai = mysqli_real_escape_string($conn, $_POST['khuyenmai']);
-$so_luong = 1; // Mặc định số lượng là 1
-$ngay_dat = date('Y-m-d');
-$ngay_du_kien_nhan = date('Y-m-d', strtotime($ngay_dat . ' + 5 days'));
-$trang_thai = 'nhận'; // Trạng thái mặc định
-// Chèn vào bảng `don_dat_hang`
-$sql = "INSERT INTO don_dat_hang (ma_san_pham, ten_san_pham, so_luong, ngay_dat, ngay_du_kien_nhan, trang_thai)
-        VALUES ('$masp', '$tensp', '$so_luong', '$ngay_dat', '$ngay_du_kien_nhan', '$trang_thai')";
-if (mysqli_query($conn, $sql)) {
-    echo "Đặt hàng thành công!";
-    header("Location: lich_su_mua_hang.php"); // Chuyển về trang lịch sử mua hàng
-    exit();
-} else {
-    echo "Lỗi: " . mysqli_error($conn);
+$id = $_GET['id']; // Lấy giá trị id từ URL
+if (!$id) {
+    echo "<script>alert(''ID không hợp lệ');</script>";
+    // echo json_encode(['message' => 'ID không hợp lệ']);
+    exit;
 }
-disconnect($conn);
+
+$conn = mysqli_connect('localhost', 'root', '', 'qlbh');
+if (!$conn) {
+    echo json_encode(['message' => 'Không thể kết nối cơ sở dữ liệu: ' . mysqli_connect_error()]);
+    exit;
+}
+// Kiểm tra ngày dự kiến nhận hàng
+$sql = "SELECT ngay_du_kien_nhan FROM lich_su_mua_hang WHERE id = $id";
+$result = mysqli_query($conn, $sql);
+if (!$result) {
+    echo json_encode(['message' => 'Lỗi truy vấn SQL: ' . mysqli_error($conn)]);
+    exit;
+}
+$row = mysqli_fetch_assoc($result);
+if (!$row) {
+    echo json_encode(['message' => 'Không tìm thấy đơn hàng với ID: ' . $id]);
+    exit;
+}
+$ngay_du_kien_nhan = $row['ngay_du_kien_nhan'];
+$ngay_hien_tai = date('Y-m-d');
+// Kiểm tra điều kiện trả hàng
+if (strtotime($ngay_du_kien_nhan) < strtotime($ngay_hien_tai . ' - 3 days')) {
+    echo json_encode(['message' => 'Không thể yêu cầu hoàn trả']);
+} else {
+    // Cập nhật trạng thái trả hàng
+    $sql_update = "UPDATE lich_su_mua_hang SET trang_thai = 'Yêu cầu trả' WHERE id = $id";
+    if (mysqli_query($conn, $sql_update)) {
+        echo json_encode(['message' => 'Đã yêu cầu trả hàng']);
+    } else {
+        echo json_encode(['message' => 'Lỗi khi cập nhật trạng thái: ' . mysqli_error($conn)]);
+    }
+}
+mysqli_close($conn);
 ?>

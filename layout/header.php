@@ -1,61 +1,79 @@
 <?php
-session_start();
-$_SESSION['rights'] = "default";
-$_SESSION['limit'] = 8;
-
-// Định nghĩa hàm connect()
-function connect() {
-    $conn = mysqli_connect('localhost', 'root', '', 'qlbh');
-    if (!$conn) {
-        die('Kết nối thất bại: ' . mysqli_connect_error());
+    session_start();
+    $_SESSION['rights'] = "default";
+    $_SESSION['limit'] = 8;
+    $cartCount = 0;
+    // Định nghĩa hàm connect()
+    function connect()
+    {
+        $conn = mysqli_connect('localhost', 'root', '', 'qlbh');
+        if (!$conn) {
+            die('Kết nối thất bại: ' . mysqli_connect_error());
+        }
+        mysqli_set_charset($conn, 'utf8'); // Đặt charset
+        return $conn; // Trả về kết nối
     }
-    mysqli_set_charset($conn, 'utf8'); // Đặt charset
-    return $conn; // Trả về kết nối
-}
-
-$conn = connect(); // Gọi hàm connect() đã định nghĩa
-
-//Khi đăng nhập thì tự động sẽ sinh ra 1 usidtf và kiểm tra trong csdl có tài khoản đó không
-if (isset($_COOKIE['usidtf'])) {
-    $s = "SELECT * FROM thanhvien WHERE id = '" . $_COOKIE['usidtf'] . "'";
-    $result = mysqli_query($conn, $s);
-    while ($row = mysqli_fetch_assoc($result)) {
-        $_SESSION['user'] = $row;
+    $conn = connect(); // Gọi hàm connect() đã định nghĩa
+    //Khi đăng nhập thì tự động sẽ sinh ra 1 usidtf và kiểm tra trong csdl có tài khoản đó không
+    if (isset($_COOKIE['usidtf'])) {
+        $s = "SELECT * FROM thanhvien WHERE id = '" . $_COOKIE['usidtf'] . "'";
+        $result = mysqli_query($conn, $s);
+        while ($row = mysqli_fetch_assoc($result)) {
+            $_SESSION['user'] = $row;
+        }
     }
-}
+    $_SESSION['sql'] = "SELECT * FROM sanpham";
+    $sql = "SELECT * FROM sanpham";
+    $result = mysqli_query($conn, $sql);
+    if (!$result) {
+        die('Query failed: ' . mysqli_error($conn));
+    }
+    $_SESSION['total'] = mysqli_num_rows($result);
+    $_SESSION['user_cart'] = []; // Khởi tạo mảng cho giỏ hàng
+    $myString = []; // Khởi tạo mảng cho myString
+    $myString[0] = "tmp"; // Gán giá trị vào vị trí 0 của mảng
+    if (isset($_SESSION['user'])) {
+        $_SESSION['rights'] = "user";
+        $_SESSION['like'] = []; // Khởi tạo mảng cho sở thích
+        $_SESSION['like'][0] = "tmp";
+        $user = $_SESSION['user'];
+        $user_id = $user['id'];
 
-$_SESSION['sql'] = "SELECT * FROM sanpham";
 
-$sql = "SELECT * FROM sanpham";
-$result = mysqli_query($conn, $sql);
-if (!$result) {
-    die('Query failed: ' . mysqli_error($conn));
-}
-$_SESSION['total'] = mysqli_num_rows($result);
+        //$_SESSION['user']['id'] là mã định danh (ID) của người dùng đó, giúp phân biệt người này với những người dùng khác.
+        $sql = "SELECT *
+                FROM 
+                    lich_su_mua_hang lsmh
+                INNER JOIN 
+                    lich_su_mua_hang_sanpham lsmh_sp ON lsmh.id = lsmh_sp.maLSmuahang
+                INNER JOIN 
+                    sanpham sp ON lsmh_sp.sanpham_id = sp.masp
+                WHERE 
+                    lsmh.user_id = $user_id AND lsmh.trang_thai = 'Giỏ hàng'
+                ";
+        $result = mysqli_query($conn, $sql);
+        // count($result)
+        if ($result) {
+            $cartCount = mysqli_num_rows($result);
+        }
 
-$_SESSION['user_cart'] = []; // Khởi tạo mảng cho giỏ hàng
-$myString = []; // Khởi tạo mảng cho myString
-$myString[0] = "tmp"; // Gán giá trị vào vị trí 0 của mảng
-
-if (isset($_SESSION['user'])) {
-    $_SESSION['rights'] = "user";
-    $_SESSION['like'] = []; // Khởi tạo mảng cho sở thích
-    $_SESSION['like'][0] = "tmp";
-    
-    //$_SESSION['user']['id'] là mã định danh (ID) của người dùng đó, giúp phân biệt người này với những người dùng khác.
+        //$_SESSION['user']['id'] là mã định danh (ID) của người dùng đó, giúp phân biệt người này với những người dùng khác.
     $sql = "SELECT masp, soluong FROM giohang WHERE user_id = '" . $_SESSION['user']['id'] . "'";
     $result = mysqli_query($conn, $sql);
     while ($row = mysqli_fetch_assoc($result)) {
-        $_SESSION['user_cart'][] = $row['masp']; // Thêm sản phẩm vào giỏ hàng
+    $_SESSION['user_cart'][] = $row['masp']; // Thêm sản phẩm vào giỏ hàng
     }
-    
+
     $sql = "SELECT masp FROM sanphamyeuthich WHERE user_id = '" . $_SESSION['user']['id'] . "'";
     $result = mysqli_query($conn, $sql);
     while ($row = mysqli_fetch_assoc($result)) {
-        $_SESSION['like'][] = $row['masp']; // Thêm sản phẩm yêu thích
+    $_SESSION['like'][] = $row['masp']; // Thêm sản phẩm yêu thích
     }
-}
+
+    }
 ?>
+
+
 
 
 <!DOCTYPE html>
@@ -143,10 +161,12 @@ if (isset($_SESSION['user'])) {
             </li>
         </ul>
         <div class="header-detail">
-            <p>113 Hoàng Sa, Đa Kao, Tân Bình, Hồ Chí Minh, Việt Nam<br>
+            <p>Khu phố 6, Phường Linh Trung, TP Thủ Đức, Việt Nam<br>
                 <i>8h - 22h Hằng ngày, kể cả Ngày lễ và Chủ nhật</i>
             </p>
         </div>
+    </header>
+
     </header>
 
     <nav class="navbar navbar-default" role="navigation" id="nav">

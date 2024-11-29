@@ -199,6 +199,27 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                                                 placeholder="Thông tin khuyến mãi">
                                         </div>
                                     </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="chatlieu" class="form-label">Chất liệu</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="chatlieu" name="chatlieu"
+                                                placeholder="Bạc, Inox, Vàng,...">
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="mau" class="form-label">Màu sắc</label>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="mau" name="mau"
+                                                placeholder="Đen, trắng,...">
+                                        </div>
+                                    </div>
+
                                     <div class="row mb-3">
                                         <div class="col-md-4">
                                             <label for="madm" class="form-label">Loại</label>
@@ -210,7 +231,7 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                                             ?>
                                         </div>
                                     </div>
-                                    >
+
                                     <div class="row mb-3">
                                         <div class="col-md-4">
                                             <label for="anhchinh" class="form-label">Hình ảnh</label>
