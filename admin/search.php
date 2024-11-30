@@ -24,8 +24,8 @@ if (isset($_GET['textSearch'])) {
                     <td>" . number_format($row['gia'], 0, ',', '.') . " VNĐ</td>
                     <td><img src='../" . htmlspecialchars($row['anhchinh']) . "' alt='" . htmlspecialchars($row['tensp']) . "' style='width: 100px; height: auto;'></td>
                     <td>
-                        <button class='btn btn-warning btn-sm'>Sửa</button>
-                        <button class='btn btn-danger btn-sm'>Xóa</button>
+                       <span><a class='btn btn-warning' href='#sua_sp-area' onclick=\"display_edit_sanpham('" . $row['masp'] . "')\">Sửa</a></span>
+                       <span class='btn btn-danger' onclick=\"xoa_sp('" . $row['masp'] . "')\">Xóa</span>
                     </td>
                   </tr>";
         }

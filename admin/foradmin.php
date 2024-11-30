@@ -35,7 +35,8 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
     <script src="../libs/jquery/jquery-latest.js"></script>
     <script src="../libs/bootstrap/js/bootstrap.min.js"></script>
     <script src="ajax.js"></script>
-    <script src="search-product.js"></script>
+    <script src="js/jquery.min.js"></script>
+
 
     <script type="text/javascript">
     $(document).ready(function() {
@@ -171,6 +172,16 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                                 <i class="glyphicon glyphicon-plus"></i> Thêm sản phẩm
                             </button>
                         </div>
+
+
+                        <!-- Nút bấm để xem thống kê -->
+                        <div class="d-flex justify-content-end mb-3" onclick="window.location.href='index.php';">
+                            <button class="btn btn-success">
+                                <i class="glyphicon glyphicon-plus"></i> Xem thống kê
+                            </button>
+                        </div>
+
+
 
                         <!-- Combobox hiển thị danh mục sản phẩm -->
                         <div id="category-dropdown">
@@ -331,6 +342,7 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                                     <button type="button" class="btn btn-danger"
                                         onclick="$('#add-pr').hide(300);$('#tbl-sanpham-list').show(300);">Hủy</button>
                                 </div>
+
                             </form>
                         </div>
                     </div>

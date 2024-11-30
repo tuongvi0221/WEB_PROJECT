@@ -278,3 +278,32 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+-----------------------------------------
+SELECT
+    YEAR(date) AS year,
+    MONTH(date) AS month,
+    SUM(tongtien) AS total_amount
+FROM
+    giaodich
+WHERE
+    tinhtrang = 1
+GROUP BY
+    YEAR(date),
+    MONTH(date)
+ORDER BY
+    year DESC, month DESC;
+
+INSERT INTO giaodich (user_id, user_name, user_dst, user_addr, user_phone, tongtien, date, tinhtrang) VALUES
+(1, 'Nguyễn Văn A', 'Hà Nội', '123 Đường ABC, Hà Nội', '0901234567', 1500000.00, '2024-11-30 10:00:00', 1),
+(2, 'Trần Thị B', 'Hồ Chí Minh', '456 Đường DEF, Hồ Chí Minh', '0912345678', 1200000.00, '2024-10-30 11:00:00', 1),
+(3, 'Lê Văn C', 'Đà Nẵng', '789 Đường GHI, Đà Nẵng', '0923456789', 2000000.00, '2024-04-30 12:00:00', 1),
+(4, 'Phạm Minh D', 'Hà Nội', '321 Đường JKL, Hà Nội', '0934567890', 2500000.00, '2024-08-30 13:00:00', 1),
+(5, 'Nguyễn Thị E', 'Hồ Chí Minh', '654 Đường MNO, Hồ Chí Minh', '0945678901', 1800000.00, '2024-10-30 14:00:00', 1),
+(6, 'Trần Văn F', 'Đà Nẵng', '987 Đường PQR, Đà Nẵng', '0956789012', 2200000.00, '2024-01-30 15:00:00', 1),
+(1, 'Nguyễn Văn A', 'Hà Nội', '123 Đường ABC, Hà Nội', '0901234567', 3000000.00, '2024-10-29 16:00:00', 1),
+(2, 'Trần Thị B', 'Hồ Chí Minh', '456 Đường DEF, Hồ Chí Minh', '0912345678', 500000.00, '2024-11-28 17:00:00', 1),
+(3, 'Lê Văn C', 'Đà Nẵng', '789 Đường GHI, Đà Nẵng', '0923456789', 3500000.00, '2024-10-27 18:00:00', 1),
+(4, 'Phạm Minh D', 'Hà Nội', '321 Đường JKL, Hà Nội', '0934567890', 4000000.00, '2024-09-26 19:00:00', 1),
+(5, 'Nguyễn Thị E', 'Hồ Chí Minh', '654 Đường MNO, Hồ Chí Minh', '0945678901', 2800000.00, '2024-11-25 20:00:00', 1),
+(6, 'Trần Văn F', 'Đà Nẵng', '987 Đường PQR, Đà Nẵng', '0956789012', 3300000.00, '2024-01-24 21:00:00', 1);

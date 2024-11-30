@@ -154,18 +154,24 @@ switch ($q) {
 
 
 function xoa_sp(){
-$masp = $_POST['masp_xoa'];
-$conn = connect();
-$sql = "DELETE FROM sanpham WHERE masp = '".$masp."'";
-if(mysqli_query($conn, $sql)){
-echo "<script>
-alert('Xóa thành công!')
-</script>";
-} else {
-echo "<script>
-alert('Đã xảy ra lỗi!')
-</script>";
-}
+	if (isset($_POST['q']) && $_POST['q'] === 'xoa_sp' && isset($_POST['masp_xoa'])) {
+		$masp = $_POST['masp_xoa'];
+	
+		// Kết nối cơ sở dữ liệu
+		$conn = connect();
+	
+		// Truy vấn xóa sản phẩm
+		$sql = "DELETE FROM sanpham WHERE masp = '" . mysqli_real_escape_string($conn, $masp) . "'";
+	
+		if (mysqli_query($conn, $sql)) {
+			echo "Xóa thành công!";
+		} else {
+			echo "Đã xảy ra lỗi!";
+		}
+	
+		// Đóng kết nối
+		disconnect($conn);
+	}
 }
 function them_dm(){
 $tendm = $_POST['tendm'];
