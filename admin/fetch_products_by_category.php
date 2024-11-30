@@ -24,9 +24,11 @@ if (isset($_GET['category_id']) && !empty($_GET['category_id'])) {
             echo "<tr>";
             echo "<td>$tensp</td>";
             echo "<td>" . number_format($gia, 0, ',', '.') . " VND</td>";
-            echo "<td><img src='$anhchinh' alt='$tensp' width='100'></td>";
+            echo "<td><img src='../$anhchinh' alt='$tensp' style='width: 100px; height: auto;'></td>";
+            
             // Sử dụng dấu ngoặc đơn trong onclick để tránh xung đột với dấu ngoặc kép
             echo "<td><span class='btn btn-danger' onclick='xoa_sp(\"$masp\")'>Xóa</span></td>";
+            echo "<td><button class='btn btn-warning btn-sm'>Sửa</button></td>";
             echo "</tr>";
         }
     } else {

@@ -31,3 +31,133 @@ input[type="file"] {
     background-color: #dc3545;
     border-color: #dc3545;
 }
+
+/* Tổng quan */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.container-fluid {
+    padding: 20px;
+}
+
+/* Tiêu đề */
+h3.text-primary, h4.text-warning {
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Nút hành động */
+.btn-success, .btn-info, .btn-primary, .btn-danger, .btn-secondary {
+    font-size: 16px;
+    padding: 10px 20px;
+}
+
+.btn-success i, .btn-info i {
+    margin-right: 5px;
+}
+
+/* Form */
+.form-control {
+    font-size: 14px;
+    padding: 10px;
+}
+
+#custom-search-input {
+    margin-bottom: 20px;
+}
+
+#custom-search-input .input-group {
+    border-radius: 5px;
+}
+
+#custom-search-input input {
+    border-right: none;
+    box-shadow: none;
+}
+
+#custom-search-input .btn-info {
+    border-left: none;
+    border-radius: 0 5px 5px 0;
+}
+
+/* Bảng sản phẩm */
+.table {
+    font-size: 14px;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.table-responsive {
+    margin-top: 20px;
+}
+
+.table thead th, .table tbody td {
+    vertical-align: middle;
+}
+
+/* Form thêm/sửa sản phẩm */
+.card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card h3, .card h4 {
+    margin-top: 0;
+}
+
+.card .form-label {
+    font-weight: bold;
+}
+
+.card .form-control {
+    border-radius: 5px;
+}
+
+/* Cải thiện thiết kế của bảng sản phẩm */
+.table-responsive-combobox,
+.table-responsive {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Tùy chỉnh các nút bấm */
+.btn {
+    margin: 5px;
+}
+
+/* Tùy chỉnh cho form tìm kiếm */
+#custom-search-input .input-group {
+    width: 100%;
+}
+
+#custom-search-input input {
+    border-radius: 20px;
+}
+
+#custom-search-input button {
+    border-radius: 50%;
+}
+
+/* Thiết kế cho các form sửa và thêm sản phẩm */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Thêm khoảng cách cho các trường form */
+.form-label {
+    font-weight: bold;
+}

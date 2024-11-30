@@ -700,8 +700,9 @@ function php_search() {
 
 
     $sql = "SELECT * FROM sanpham sp
-            JOIN danhmucsp dm ON sp.madm = dm.madm
-            WHERE sp.tensp LIKE '%" . mysqli_real_escape_string($conn, $s) . "%'"; 
+    JOIN danhmucsp dm ON sp.madm = dm.madm
+    WHERE sp.tensp LIKE '%" . mysqli_real_escape_string($conn, $s) . "%'"; 
+
 
     $result = mysqli_query($conn, $sql);
 

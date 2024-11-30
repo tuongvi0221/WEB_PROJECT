@@ -39,51 +39,86 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
 
     <script type="text/javascript">
     $(document).ready(function() {
+        // Ẩn các phần tử ban đầu
         $('#add-pr').hide();
         $('#add-dm').hide();
         $('#add-admin-area').hide();
         $('#sua_sp-area').hide();
+        $('#tbl-sanpham').hide();
+        $('#loadmorebtn-combobox').hide();
+        $('#loadmorebtn-timkiem').hide();
+
+        // Hiệu ứng mượt mà cho các nút thêm sản phẩm
         $('#addspbtn').click(function() {
-            $('#add-pr').toggle(300);
-            $('#tbl-sanpham-list').toggle(300);
-            $('#loadmorebtn').toggle(300);
-        });
-        $('#adddmbtn').click(function() {
-            $('#add-dm').toggle(300);
-        });
-        $('.xong').click(function() {
-            $(this).closest('tr').children("td:nth-child(2)").html(
-                '<h4 class="label label-success">Đã giao hàng</h4>');
-            $(this).remove();
-        });
-        $('#add-admin-btn').click(function() {
-            $('#add-admin-area').toggle(300);
+            $('#add-pr').slideToggle(300); // Dùng slideToggle thay vì toggle
+            $('#tbl-sanpham-list').slideToggle(300);
+            $('#loadmorebtn').toggle(300); // Giữ nguyên nếu cần nút tải thêm
+
         });
 
-        // Khi người dùng chọn một danh mục sản phẩm
+        // Hiệu ứng mượt mà cho các phần thêm danh mục sản phẩm
+        $('#adddmbtn').click(function() {
+            $('#add-dm').slideToggle(300);
+        });
+
+        // Chức năng tìm kiếm
+        $('#btn-info').click(function() {
+            var textSearch = $('#src-v').val(); // Lấy giá trị tìm kiếm
+            if (textSearch) {
+                $.get('search.php', {
+                    textSearch: textSearch
+                }, function(response) {
+                    $('#product-list').html(response); // Cập nhật kết quả tìm kiếm vào table
+                    $('#tbl-sanpham-list').hide(); // Ẩn bảng danh sách sản phẩm gốc
+                    $('#loadmorebtn').hide(); // Ẩn nút tải thêm
+                    $('#tbl-sanpham').show();
+                    $('#loadmorebtn-timkiem').show();
+
+                });
+            } else {
+                $('#product-list').html(
+                    '<tr><td colspan="4" class="text-center">Vui lòng nhập từ khóa tìm kiếm</td></tr>'
+                );
+            }
+        });
+
+        // Xử lý chọn danh mục sản phẩm
         $('#category-select').change(function() {
             var categoryId = $(this).val(); // Lấy giá trị danh mục đã chọn
-
-            // Gửi yêu cầu đến server nếu có chọn danh mục
             if (categoryId) {
                 $.get('fetch_products_by_category.php', {
                     category_id: categoryId
                 }, function(response) {
-                    $('#product-list').html(response); // Hiển thị kết quả vào tbody của bảng
+                    $('#product-list').html(
+                        response); // Hiển thị kết quả sản phẩm theo danh mục
+                    $('#tbl-sanpham-list').hide(); // Ẩn bảng danh sách sản phẩm gốc
+                    $('#loadmorebtn').hide(); // Ẩn nút tải thêm
+                    $('#loadmorebtn-search').hide(); // Ẩn nút tải thêm
+                    $('#custom-search-input').hide(); // 
+                    $('#tbl-sanpham').show();
+                    $('#loadmorebtn-combobox').show();
+
                 });
             } else {
-                $('#product-list').html(''); // Nếu không chọn danh mục, xóa danh sách sản phẩm
+                $('#product-list').html(''); // Xóa danh sách sản phẩm nếu không chọn danh mục
             }
-
-            $('#tbl-sanpham-list').hide(300);
-            $('#loadmorebtn').hide(300);
         });
+
+        // Nút tải thêm sản phẩm
+        $('#loadmorebtn').click(function() {
+            var current = 0; // Thiết lập chỉ số ban đầu nếu cần
+            load_more(current, 'product-list'); // Gọi hàm tải thêm
+        });
+
+
+
+
     });
 
     function load_more(current, where) {
         var fname = 'load_more';
         var x = current + 1;
-        $('#loadmorebtn').attr('onclick', 'load_more(' + x + ',`' + where + '`)');
+        $('#loadmorebtn').attr('onclick', 'load_more(' + x + ', `' + where + '`)');
         $.ajax({
             url: "for-ajax.php",
             type: "get",
@@ -93,34 +128,11 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                 current
             },
             success: function(result) {
-                if (result.search('Đã hết mục để hiển thị') != -1) {
+                if (result.indexOf('Đã hết mục để hiển thị') != -1) {
                     alert('Đã hết mục để hiển thị!');
                     return;
                 }
-                $('#' + where).append(result);
-            }
-        });
-    }
-
-    function load_more_gd(current, where, stt) {
-        var fname = 'load_more_gd';
-        var x = current + 1;
-        $('#loadmorebtngd').attr('onclick', 'load_more_gd(' + x + ',`' + where + '`,`' + stt + '`)');
-        $.ajax({
-            url: "for-ajax.php",
-            type: "get",
-            dataType: "text",
-            data: {
-                fname,
-                current,
-                stt
-            },
-            success: function(result) {
-                if (result.search('Đã hết mục để hiển thị') != -1) {
-                    alert("Đã hết mục để hiển thị!");
-                    return;
-                }
-                $('#' + where).append(result);
+                $('#' + where).append(result); // Thêm kết quả vào phần tử đích
             }
         });
     }
@@ -183,8 +195,8 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                         </div>
 
                         <!-- Danh sách sản phẩm -->
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped table-bordered" id="tbl-sanpham-combobox">
+                        <div class="table-responsive-combobox">
+                            <table class="table table-hover table-striped table-bordered" id="tbl-sanpham">
                                 <thead>
                                     <tr>
                                         <th>Tên sản phẩm</th>
@@ -199,9 +211,27 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                             </table>
                             <div class="text-center mt-3">
                                 <button class="btn btn-primary" onclick="load_more(0,'body-sp-list','sp')"
-                                    id="loadmorebtn">Tải thêm</button>
+                                    id="loadmorebtn-combobox">Tải thêm</button>
                             </div>
                         </div>
+
+                        <!-- Form tìm kiếm sản phẩm -->
+                        <div id="custom-search-input">
+                            <div class="input-group col-md-12" style="background-color: white;">
+                                <input type="text" class="form-control input-lg" placeholder="Bạn tìm gì?" id='src-v' />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-info btn-lg" type="button" id='btn-info'>
+                                        <i class="glyphicon glyphicon-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <button class="btn btn-primary" onclick="load_more(0,'body-sp-list','sp')"
+                                id="loadmorebtn-timkiem">Tải thêm</button>
+                        </div>
+
 
                         <!-- Form sửa sản phẩm -->
                         <div id='sua_sp-area' class="card shadow-sm p-4 mb-4 d-none">
