@@ -329,6 +329,8 @@ function tinh_tien() {
 
 
 
+
+
 function check_before_submit(){
 	var ten = $('#s_ten').val();
 	var quan = $('#s_quan').val();

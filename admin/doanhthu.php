@@ -1,32 +1,46 @@
 <?php
-require_once 'function.php'; // Kết nối cơ sở dữ liệu
-
 // Kết nối cơ sở dữ liệu
-$conn = connect();
-mysqli_set_charset($conn, 'utf8');
+$conn = new mysqli("localhost", "root", "", "qlbh");
 
-// Truy vấn để lấy tổng tiền theo tháng và năm, chỉ lấy giao dịch đã giao
-$sql = "SELECT YEAR(date) AS year, MONTH(date) AS month, SUM(tongtien) AS total_amount
-        FROM giaodich
-        WHERE tinhtrang = 1
-        GROUP BY YEAR(date), MONTH(date)
-        ORDER BY year DESC, month DESC";
-
-$result = mysqli_query($conn, $sql);
-
-// Khởi tạo mảng dữ liệu
-$months = [];
-$totals = [];
-
-// Lấy dữ liệu từ cơ sở dữ liệu
-while ($row = mysqli_fetch_assoc($result)) {
-    $months[] = $row['month'] . '/' . $row['year']; // Tháng/Năm
-    $totals[] = $row['total_amount']; // Tổng tiền
+// Kiểm tra kết nối
+if ($conn->connect_error) {
+    die("Kết nối thất bại: " . $conn->connect_error);
 }
 
-// Đóng kết nối cơ sở dữ liệu
-disconnect($conn);
+// Lấy năm từ request
+$year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
 
-// Trả về dữ liệu dưới dạng JSON
+// Câu truy vấn SQL
+$sql = "SELECT 
+            MONTH(date) AS month, 
+            SUM(tongtien) AS total_amount 
+        FROM 
+            giaodich 
+        WHERE 
+            tinhtrang = 1 AND YEAR(date) = ?
+        GROUP BY 
+            MONTH(date)
+        ORDER BY 
+            month ASC";
+
+// Chuẩn bị và thực thi câu truy vấn
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $year);
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Chuẩn bị dữ liệu trả về JSON
+$months = [];
+$totals = [];
+while ($row = $result->fetch_assoc()) {
+    $months[] = $row['month'];
+    $totals[] = $row['total_amount'];
+}
+
+// Đóng kết nối
+$stmt->close();
+$conn->close();
+
+// Trả về JSON
 echo json_encode(['months' => $months, 'totals' => $totals]);
 ?>
