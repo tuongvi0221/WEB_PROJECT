@@ -59,7 +59,7 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
 
         // Hiệu ứng mượt mà cho các phần thêm danh mục sản phẩm
         $('#adddmbtn').click(function() {
-            $('#add-dm').slideToggle(300);
+            $('#add-dm').show(300);
         });
 
         // Chức năng tìm kiếm
@@ -356,9 +356,10 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                     <div class="container-fluid py-4">
                         <h3 class="text-primary text-center mb-4">Danh sách thành viên</h3>
                         <div class="d-flex justify-content-end mb-3">
-                            <button class="btn btn-success" id="add-admin-btn">
+                            <button class="btn btn-success" id="add-admin-btn"
+                                onclick="$('#add-admin-area').toggle(300);">
                                 <i class="glyphicon glyphicon-plus"></i> Thêm admin
-                            </button>
+
                         </div>
                         <div id="add-admin-area" class="card shadow-sm p-4 mb-4 d-none">
                             <h4 class="text-primary mb-4">Thêm Admin</h4>

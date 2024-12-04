@@ -389,6 +389,7 @@ function them_admin() {
     disconnect($conn);
 }
 
+
 function xoa_taikhoan(){
 	$id = $_POST['id_tk_xoa'];
 	$conn = connect();

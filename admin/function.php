@@ -203,6 +203,7 @@ function product_list(){
 </tbody>
 <?php
 }
+
 //in ra cac loai sp
 function list_type_pr_for_add(){
 	$conn = connect();
