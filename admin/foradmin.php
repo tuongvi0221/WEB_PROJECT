@@ -46,8 +46,10 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
         $('#add-admin-area').hide();
         $('#sua_sp-area').hide();
         $('#tbl-sanpham').hide();
-        $('#loadmorebtn-combobox').hide();
-        $('#loadmorebtn-timkiem').hide();
+        $('#tbl-sanpham-combobox').hide();
+
+
+
 
         // Hiệu ứng mượt mà cho các nút thêm sản phẩm
         $('#addspbtn').click(function() {
@@ -69,11 +71,13 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                 $.get('search.php', {
                     textSearch: textSearch
                 }, function(response) {
-                    $('#product-list').html(response); // Cập nhật kết quả tìm kiếm vào table
+                    $('#product-list-timkiem').html(
+                        response); // Cập nhật kết quả tìm kiếm vào table
                     $('#tbl-sanpham-list').hide(); // Ẩn bảng danh sách sản phẩm gốc
                     $('#loadmorebtn').hide(); // Ẩn nút tải thêm
                     $('#tbl-sanpham').show();
-                    $('#loadmorebtn-timkiem').show();
+                    $('#product-list-combobox').hide();
+                    $('#tbl-sanpham-combobox').hide();
 
                 });
             } else {
@@ -90,14 +94,13 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                 $.get('fetch_products_by_category.php', {
                     category_id: categoryId
                 }, function(response) {
-                    $('#product-list').html(
+                    $('#product-list-combobox').html(
                         response); // Hiển thị kết quả sản phẩm theo danh mục
                     $('#tbl-sanpham-list').hide(); // Ẩn bảng danh sách sản phẩm gốc
-                    $('#loadmorebtn').hide(); // Ẩn nút tải thêm
-                    $('#loadmorebtn-search').hide(); // Ẩn nút tải thêm
-                    $('#custom-search-input').hide(); // 
-                    $('#tbl-sanpham').show();
-                    $('#loadmorebtn-combobox').show();
+                    $('#tbl-sanpham-timkiem').hide();
+                    $('#tbl-sanpham-combobox').show();
+                    $('#loadmorebtn').hide();
+
 
                 });
             } else {
@@ -166,48 +169,44 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                 <div role="tabpanel" class="tab-pane active" id="sanpham">
                     <div class="container-fluid">
                         <h3 class="text-center text-primary mb-4">Quản lý sản phẩm</h3>
-                        <!-- Nút thêm sản phẩm -->
-                        <div class="d-flex justify-content-end mb-3">
+                        <!-- Nút thêm sản phẩm và xem thống kê -->
+                        <div class="d-flex justify-content-end mb-3 gap-2">
                             <button class="btn btn-success" id="addspbtn">
                                 <i class="glyphicon glyphicon-plus"></i> Thêm sản phẩm
                             </button>
-                        </div>
-
-
-                        <!-- Nút bấm để xem thống kê -->
-                        <div class="d-flex justify-content-end mb-3" onclick="window.location.href='index.php';">
-                            <button class="btn btn-success">
+                            <button class="btn btn-success" onclick="window.location.href='index.php';">
                                 <i class="glyphicon glyphicon-plus"></i> Xem thống kê
                             </button>
                         </div>
 
 
-
                         <!-- Combobox hiển thị danh mục sản phẩm -->
                         <div id="category-dropdown">
                             <label for="category-select">Chọn loại sản phẩm:</label>
-                            <select id="category-select" class="form-control" name="category_id">
+                            <select id="category-select" class="form-control" name="category_id"
+                                style="font-size: 1.5rem; height: 5rem;">
                                 <option value="">Tất cả các loại sản phẩm</option>
                                 <?php 
-                                // Kết nối cơ sở dữ liệu và lấy danh mục sản phẩm
-                                require_once 'function.php'; 
-                                $conn = connect();
-                                mysqli_set_charset($conn, 'utf8');
-                                $sql = "SELECT madm, tendm FROM danhmucsp"; // Lấy mã và tên danh mục
-                                $result = mysqli_query($conn, $sql);
-                                while ($row = mysqli_fetch_assoc($result)) {
-                                    $category_id = htmlspecialchars($row['madm']);
-                                    $category_name = htmlspecialchars($row['tendm']);
-                                    echo "<option value='$category_id'>$category_name</option>";
-                                }
-                                disconnect($conn);
-                                ?>
+                            // Kết nối cơ sở dữ liệu và lấy danh mục sản phẩm
+                            require_once 'function.php'; 
+                            $conn = connect();
+                            mysqli_set_charset($conn, 'utf8');
+                            $sql = "SELECT madm, tendm FROM danhmucsp"; // Lấy mã và tên danh mục
+                            $result = mysqli_query($conn, $sql);
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                $category_id = htmlspecialchars($row['madm']);
+                                $category_name = htmlspecialchars($row['tendm']);
+                                echo "<option value='$category_id'>$category_name</option>";
+                            }
+                            disconnect($conn);
+                            ?>
                             </select>
                         </div>
 
+
                         <!-- Danh sách sản phẩm -->
                         <div class="table-responsive-combobox">
-                            <table class="table table-hover table-striped table-bordered" id="tbl-sanpham">
+                            <table class="table table-hover table-striped table-bordered" id="tbl-sanpham-combobox">
                                 <thead>
                                     <tr>
                                         <th>Tên sản phẩm</th>
@@ -216,14 +215,10 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                                         <th>Hành động</th>
                                     </tr>
                                 </thead>
-                                <tbody id="product-list">
+                                <tbody id="product-list-combobox">
                                     <!-- Sản phẩm sẽ được hiển thị ở đây -->
                                 </tbody>
                             </table>
-                            <div class="text-center mt-3">
-                                <button class="btn btn-primary" onclick="load_more(0,'body-sp-list','sp')"
-                                    id="loadmorebtn-combobox">Tải thêm</button>
-                            </div>
                         </div>
 
                         <!-- Form tìm kiếm sản phẩm -->
@@ -238,9 +233,21 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
                             </div>
                         </div>
 
-                        <div class="text-center mt-3">
-                            <button class="btn btn-primary" onclick="load_more(0,'body-sp-list','sp')"
-                                id="loadmorebtn-timkiem">Tải thêm</button>
+                        <!-- Danh sách sản phẩm -->
+                        <div class="table-responsive-timkiem">
+                            <table class="table table-hover table-striped table-bordered" id="tbl-sanpham">
+                                <thead>
+                                    <tr>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Giá</th>
+                                        <th>Hình ảnh</th>
+                                        <th>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="product-list-timkiem">
+                                    <!-- Sản phẩm sẽ được hiển thị ở đây -->
+                                </tbody>
+                            </table>
                         </div>
 
 

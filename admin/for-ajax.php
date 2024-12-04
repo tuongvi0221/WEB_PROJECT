@@ -402,30 +402,49 @@ function xoa_taikhoan(){
 	disconnect($conn);
 }
 
-function sua_sp(){
-	$masp = $_POST['masp_sua'];
-	$tensp = $_POST['tensp_ed'];
-	$gia = $_POST['gia_ed'];
-	$khuyenmai = $_POST['khuyenmai_ed'];
-	$tinhtrang = $_POST['tinhtrang_ed'];
-	$set = []; $data = [];
-	if($tensp != ""){$data[] = $tensp; $set[] = 'tensp';}
-	if($gia != ""){$data[] = $gia; $set[] = 'gia';}
-	if($khuyenmai != ""){$data[] = $khuyenmai; $set[] = 'khuyenmai';}
-	if($tinhtrang != ""){$data[] = $tinhtrang; $set[] = 'tinhtrang';}
-	$str = '';
-	for ($i=0; $i < count($set); $i++) { 
-		$str.= $set[$i]."='".$data[$i]."',";
+function sua_sp() {
+	$masp = isset($_POST['masp_sua']) ? $_POST['masp_sua'] : null;
+	$tensp = isset($_POST['tensp_ed']) ? $_POST['tensp_ed'] : null;
+	$gia = isset($_POST['gia_ed']) ? $_POST['gia_ed'] : null;
+	$khuyenmai = isset($_POST['khuyenmai_ed']) ? $_POST['khuyenmai_ed'] : null;
+	$tinhtrang = isset($_POST['tinhtrang_ed']) ? $_POST['tinhtrang_ed'] : null;
+
+	// Chuẩn bị mảng dữ liệu cập nhật
+	$set = [];
+	if ($tensp !== null && $tensp !== "") {
+			$set[] = "tensp = '" . mysqli_real_escape_string(connect(), $tensp) . "'";
 	}
-	$str = trim($str, ',');
+	if ($gia !== null && $gia !== "") {
+			$set[] = "gia = '" . mysqli_real_escape_string(connect(), $gia) . "'";
+	}
+	if ($khuyenmai !== null && $khuyenmai !== "") {
+			$set[] = "khuyenmai = '" . mysqli_real_escape_string(connect(), $khuyenmai) . "'";
+	}
+	if ($tinhtrang !== null && $tinhtrang !== "") {
+			$set[] = "tinhtrang = '" . mysqli_real_escape_string(connect(), $tinhtrang) . "'";
+	}
+
+	// Kết hợp các phần tử của mảng `set` thành chuỗi
+	$str = implode(", ", $set);
+
+	// Nếu không có gì để cập nhật
+	if (empty($str)) {
+			echo "<script>alert('Không có gì để cập nhật.');</script>";
+			return;
+	}
+
 	$conn = connect();
-	$sql = "UPDATE sanpham SET ".$str." WHERE masp = '".$masp."'";
-	echo $sql;
-	return 0;
-	if(!mysqli_query($conn, $sql)){
-		echo "Đã xảy ra lỗi!";
+	$sql = "UPDATE sanpham SET $str WHERE masp = '" . mysqli_real_escape_string($conn, $masp) . "'";
+
+	if (mysqli_query($conn, $sql)) {
+			// Hiển thị thông báo và reload lại trang
+			echo "<script>
+							alert('Cập nhật thành công!');
+							window.location.reload(); // Reload trang hiện tại
+						</script>";
 	} else {
-		echo "<script>alert('Sửa xong!')</script>";
+			echo "Đã xảy ra lỗi: " . mysqli_error($conn);
 	}
+
 	disconnect($conn);
 }

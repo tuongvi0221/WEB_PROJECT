@@ -2,18 +2,10 @@ function them_sp(){
 	var q = 'them_sp',
 	tensp = $('#tensp').val(),
 	gia = $('#gia').val(),
-	baohanh = $('#baohanh').val(),
-	trongluong = $('#trongluong').val(),
 	chatlieu = $('#chatlieu').val(),
-	chongnuoc = $('#chongnuoc').val(),
-	nangluong = $('#nangluong').val(),
-	loaibh = $('#loaibh').val(),
-	kichthuoc = $('#kichthuoc').val(),
 	mau = $('#mau').val(),
 	danhcho = $('#danhcho').val(),
-	phukien = $('#phukien').val(),
 	khuyenmai = $('#khuyenmai').val(),
-	tinhtrang = $('#tinhtrang').val(),
 	madm = $('#madm').val(),
 	anhchinh = $('#anhchinh').val();
 	console.log(tensp);
@@ -28,8 +20,8 @@ function them_sp(){
 		type : "post",
 		dataType:"text",
 		data : {
-			q, tensp, gia, baohanh, trongluong, chatlieu, chongnuoc, nangluong
-			, loaibh, kichthuoc, mau, danhcho, phukien, khuyenmai, tinhtrang, madm, anhchinh
+			q, tensp, gia,chatlieu, 
+			mau, danhcho, khuyenmai, madm, anhchinh
 		},
 		success : function (result){
 			$("#sp_error").html(result);
