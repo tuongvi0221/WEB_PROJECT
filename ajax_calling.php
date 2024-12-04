@@ -625,9 +625,6 @@ function php_giohang()
 }
 
 
-
-
-
 function php_like(){
 	?>
 

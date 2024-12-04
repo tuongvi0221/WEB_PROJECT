@@ -189,5 +189,30 @@ function updateCountdown() {
 var countdownInterval = setInterval(updateCountdown, 1000);
 </script>
 
+?>
+<script type="text/javascript">
+function tinh_tien() {
+    var query = 'tinh_tien';
+    var sl = [];
+    var sum = 0;
+    $('input[name="sl[]"]').each(function() {
+        sl.push($(this).val());
+    });
+    var array = [];
+    $(".cost").each(function() {
+        array.push($(this).data("val"));
+    });
+    for (var i = 0; i < sl.length; i++) {
+        var tmp = array[i].replace(/ /g, '');
+        sum += Number(tmp) * sl[i];
+    }
+    sum = sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    $('#tong_tien').html(sum);
+}
+
+window.onload = function() {
+    tinh_tien()
+}
+</script>
 
 <?php require_once 'layout/second_footer.php'; ?>

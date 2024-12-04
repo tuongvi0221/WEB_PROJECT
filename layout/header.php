@@ -144,8 +144,9 @@
             </li>
             <div id='user-setting'>
                 <ul>
-                    <li onclick='call_to_dangxuat()'>Đăng xuất</li>
                     <li onclick="call_to_thongtin();$('#user-setting').toggle()">Thông tin tài khoản</li>
+                    <br />
+                    <li onclick='call_to_dangxuat()'>Đăng xuất</li>
                 </ul>
             </div>
             <?php }
@@ -154,8 +155,17 @@
             <li data-userid="<?php echo isset($_SESSION['user']) ? $_SESSION['user']['id'] : ''; ?>"
                 onclick="ajax_giohang()">
                 <i class="glyphicon glyphicon-shopping-cart"></i> Giỏ hàng
-            </li>
+                <div class="mn-ef"></div>
 
+            </li>
+            <?php if (isset($_SESSION['rights']) && $_SESSION['rights'] !== "default" && isset($_SESSION['user'])) { ?>
+            <li>
+                <a href="lich_su_mua_hang.php" class="btn btn-info"
+                    style="margin-top: 5px; color: white; font-size: 16px; padding: 10px 20px; border-radius: 5px;">
+                    Lịch sử mua hàng
+                </a>
+            </li>
+            <?php } ?>
 
             <div class="mn-ef"></div>
             </li>
@@ -228,6 +238,7 @@
                 <div onclick="ajax_giohang()" style="cursor: pointer;">
                     <i class="glyphicon glyphicon-shopping-cart navbar-right btn-lg" id="cart_count">
                         <?php
+                   
         if ($_SESSION['rights'] == "default") {
             if (isset($_SESSION['client_cart'])) {
                 echo count($_SESSION['client_cart']);
@@ -235,7 +246,7 @@
                 echo "0";  // Mặc định là 0 nếu không có giỏ hàng
             }
         } else {
-            echo max(count($_SESSION['user_cart']) - 1, 0);  // Tránh số lượng giỏ hàng âm
+            echo max(count($_SESSION['user_cart']), 0);  // Tránh số lượng giỏ hàng âm
         }
         ?>
                     </i>

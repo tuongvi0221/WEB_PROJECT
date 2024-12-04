@@ -296,37 +296,28 @@ function hien_sanpham(masp_to_display){
 	});
 }
 function tinh_tien() {
-    var query = 'tinh_tien';
-    var sl = [];
-    var array = [];
     var sum = 0;
 
-    // Thu thập số lượng và giá của những sản phẩm được chọn (đánh dấu checkbox)
+    // Thu thập giá trị từ các ô input của sản phẩm đã chọn
     $('input[name="selected_products[]"]:checked').each(function() {
-        var row = $(this).closest(".prd-in-cart"); // Lấy dòng chứa thông tin sản phẩm
+        var row = $(this).closest("tr"); // Lấy dòng chứa thông tin sản phẩm
 
-        // Lấy số lượng từ input số lượng
+        // Lấy số lượng từ input
         var quantity = row.find('input[name="sl[]"]').val();
-        sl.push(quantity);
 
-        // Lấy giá trị từ data của phần tử có class "cost"
-        var price = row.find(".cost").data("val").toString().replace(/ /g, '');
-        array.push(price);
+        // Lấy giá từ thuộc tính data-val của phần tử có class "cost"
+        var price = row.find(".cost").data("val").toString().replace(/ /g, ''); // Loại bỏ dấu cách
+
+        // Tính tổng tiền
+        sum += Number(price) * Number(quantity);
     });
 
-    // Tính tổng tiền
-    for (var i = 0; i < sl.length; i++) {
-        sum += Number(array[i]) * sl[i];
-    }
-
-    // Định dạng số tiền
+    // Định dạng số tiền với dấu cách (ngăn cách hàng nghìn)
     sum = sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 
     // Cập nhật tổng tiền vào phần tử HTML
-    $('#tong_tien').html(sum);
+    $('#tong_tien').html(sum + " VND");
 }
-
-
 
 
 

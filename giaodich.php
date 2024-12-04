@@ -1,16 +1,17 @@
 <?php 
+
 session_start();
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/PHPMailer/src/Exception.php';
+
 require 'vendor/PHPMailer/src/PHPMailer.php';
 require 'vendor/PHPMailer/src/SMTP.php';
 
 require_once 'backend-index.php';
 require_once 'layout/second_header.php';
-$ten = $quan = $dc = $sodt = $money = $sl = $email = 0; // Khởi tạo biến với giá trị 0
+$ten = $quan = $dc = $sodt = $money = $sl = 0; // Khởi tạo biến với giá trị 0
 if(isset($_POST['ten'])){
 	$ten = $_POST['ten'];
 }
@@ -68,83 +69,75 @@ if($money == 0){
             <i>Quý khách sẽ sớm nhận được cuộc gọi xác nhận của chúng tôi, giá trị đơn hàng này là
                 <b><?php echo number_format($money, 0, ","," ") ?> VND</b> và sẽ được thanh toán sau khi nhận hàng!</i>
             <a href="index.php">Quay lại trang chủ</a>
-            <img src="images/clothes/tks4buying.png" width=100>
+            <img src="images/tks4buying.png">
         </div>
     </div>
 </div>
 
 <?php
-$user_id = "";
+$userId = "";
 if($_SESSION['rights'] == "user"){
-	$user_id = $_SESSION['user']['id'];
-}
-$sql = "INSERT INTO giaodich VALUES ('',0,'".$user_id."','".$ten."','".$quan."','".$dc."','".$sodt."','".$money."','".$now."')";
-if(!mysqli_query($conn, $sql)){
-	echo "Đã xảy ra một lỗi nhỏ trong quá trình đặt hàng, vui lòng đặt hàng lại!";
-}
-
-// Gửi mail
-if ($_SESSION['rights'] == 'user') {
-	// Lấy email từ cơ sở dữ liệu
-	$userId = $_SESSION['user']['id'];
-	$query = "SELECT email FROM users WHERE id = '$userId'";
-	$result = mysqli_query($conn, $query);
-	$row = mysqli_fetch_assoc($result);
-	$email = $row['email'];
-} else {
-	// Lấy email từ form
-	$email = $_POST['email'];
-}
-
-// Khởi tạo đối tượng PHPMailer
-$mail = new PHPMailer(true);
-
-try {
-	// Cấu hình server SMTP của Gmail
-	$mail->isSMTP();
-	$mail->Host = 'smtp.gmail.com'; // Server SMTP của Gmail
-	$mail->SMTPAuth = true;
-	$mail->Username = 'huuthien180204@gmail.com'; // Địa chỉ email của shop
-	$mail->Password = 'ejsnaiikwgbgjacr'; // Mật khẩu ứng dụng hoặc mật khẩu của email
-	$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-	$mail->Port = 587; // Port cho STARTTLS là 587
-	$mail->CharSet = 'UTF-8';
-
-	// Thông tin người gửi và người nhận
-	$mail->setFrom('huuthien180204@gmail.com', 'Fashion Katy'); // Địa chỉ và tên người gửi
-	$mail->addAddress($email, $ten); // Địa chỉ và tên người nhận
-
-	// Tạo nội dung chi tiết đơn hàng
-	$orderDetails = "<ul>";
-	for ($i = 0; $i < count($sl); $i++) {
-			$productName = $_SESSION['product_names'][$i]; // Tên sản phẩm
-			$quantity = $sl[$i];
-			$price = number_format($_SESSION['cost'][$i], 0, ",", ".") . " VND";
-			$totalPrice = number_format($quantity * $_SESSION['cost'][$i], 0, ",", ".") . " VND";
-			
-			$orderDetails .= "<li> Sản phẩm: $productName, Số lượng: $quantity, Đơn giá: $price, Thành tiền: $totalPrice </li>";
+	if ($_SESSION['rights'] == 'user') {
+		// Lấy email từ cơ sở dữ liệu
+		$userId = $_SESSION['user']['id'];
+		$query = "SELECT email FROM users WHERE id = '$userId'";
+		$result = mysqli_query($conn, $query);
+		$row = mysqli_fetch_assoc($result);
+		$email = $row['email'];
+	} else {
+		// Lấy email từ form
+		$email = $_POST['email'];
 	}
-	$orderDetails .= "</ul>";
-
-	// Thiết lập nội dung email mới
-	$mail->isHTML(true);
-	$mail->Subject = "Đơn hàng của bạn đã được đặt thành công";
-	$mail->Body = "<p>Xin chào $ten,</p>
-								 <p>Cảm ơn bạn đã đặt hàng!</p>
-								 <p>Chi tiết đơn hàng:</p>
-								 $orderDetails
-								 <p><strong>Tổng giá trị đơn hàng: " . number_format($money, 0, ",", ".") . " VND</strong></p>
-								 <p>Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.</p>
-								 <p>Trân trọng,<br>Đội ngũ hỗ trợ khách hàng.</p>";
-
-	// Gửi email
-	$mail->send();
-	echo "Email đã được gửi thành công đến $email";
-} catch (Exception $e) {
-	echo "Có lỗi xảy ra khi gửi email. Lỗi: {$mail->ErrorInfo}";
+	
+	// Khởi tạo đối tượng PHPMailer
+	$mail = new PHPMailer(true);
+	
+	try {
+		// Cấu hình server SMTP của Gmail
+		$mail->isSMTP();
+		$mail->Host = 'smtp.gmail.com'; // Server SMTP của Gmail
+		$mail->SMTPAuth = true;
+		$mail->Username = 'huuthien180204@gmail.com'; // Địa chỉ email của shop
+		$mail->Password = 'ejsnaiikwgbgjacr'; // Mật khẩu ứng dụng hoặc mật khẩu của email
+		$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+		$mail->Port = 587; // Port cho STARTTLS là 587
+		$mail->CharSet = 'UTF-8';
+	
+		// Thông tin người gửi và người nhận
+		$mail->setFrom('huuthien180204@gmail.com', 'Fashion Katy'); // Địa chỉ và tên người gửi
+		$mail->addAddress($email, $ten); // Địa chỉ và tên người nhận
+	
+		// Tạo nội dung chi tiết đơn hàng
+		$orderDetails = "<ul>";
+		for ($i = 0; $i < count($sl); $i++) {
+				$productName = $_SESSION['product_names'][$i]; // Tên sản phẩm
+				$quantity = $sl[$i];
+				$price = number_format($_SESSION['cost'][$i], 0, ",", ".") . " VND";
+				$totalPrice = number_format($quantity * $_SESSION['cost'][$i], 0, ",", ".") . " VND";
+				
+				$orderDetails .= "<li> Sản phẩm: $productName, Số lượng: $quantity, Đơn giá: $price, Thành tiền: $totalPrice </li>";
+		}
+		$orderDetails .= "</ul>";
+	
+		// Thiết lập nội dung email mới
+		$mail->isHTML(true);
+		$mail->Subject = "Đơn hàng của bạn đã được đặt thành công";
+		$mail->Body = "<p>Xin chào $ten,</p>
+									 <p>Cảm ơn bạn đã đặt hàng!</p>
+									 <p>Chi tiết đơn hàng:</p>
+									 $orderDetails
+									 <p><strong>Tổng giá trị đơn hàng: " . number_format($money, 0, ",", ".") . " VND</strong></p>
+									 <p>Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.</p>
+									 <p>Trân trọng,<br>Đội ngũ hỗ trợ khách hàng.</p>";
+	
+		// Gửi email
+		$mail->send();
+		echo "Email đã được gửi thành công đến $email.";
+	} catch (Exception $e) {
+		echo "Có lỗi xảy ra khi gửi email. Lỗi: {$mail->ErrorInfo}";
+	}
+	
 }
-
-
 $sql = "INSERT INTO giaodich VALUES ('',0,'".$user_id."','".$ten."','".$quan."','".$dc."','".$sodt."','".$money."','".$now."')";
 if(!mysqli_query($conn, $sql)){
 	echo "Đã xảy ra một lỗi nhỏ trong quá trình đặt hàng, vui lòng đặt hàng lại!";
@@ -181,5 +174,4 @@ for($i = 0; $i < count($sql_multi); $i++){
 	$result = mysqli_query($conn, $sql_multi[$i]);
 }
 require_once 'layout/second_footer.php';
-
 ?>

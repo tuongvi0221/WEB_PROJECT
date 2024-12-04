@@ -7,7 +7,7 @@ if (!$id) {
     exit;
 }
 // Kết nối cơ sở dữ liệu
-$conn = mysqli_connect('localhost', 'root', '280704', 'qlbh');
+$conn = mysqli_connect('localhost', 'root', '', 'qlbh');
 if (!$conn) {
     die("Kết nối thất bại: " . mysqli_connect_error());
 }

@@ -262,6 +262,7 @@ FOREIGN KEY (sanpham_id) REFERENCES sanpham(masp) ON DELETE CASCADE
 );
 
 
+
 -- Tạo bảng giao dịch (giả sử bảng giao dịch có mã giao dịch và trạng thái)
 CREATE TABLE `giao_dich` (
     `ma_giao_dich` INT AUTO_INCREMENT PRIMARY KEY,
@@ -293,6 +294,7 @@ DELIMITER ;
 
 
 
+
 -- Trigger thay đổi trạng thái giao dịch sau khi đặt hàng
 DELIMITER $$
 
@@ -310,7 +312,6 @@ BEGIN
 END$$
 
 DELIMITER ;
-
 -----------------------------------------
 SELECT
     YEAR(date) AS year,
