@@ -223,7 +223,7 @@
                     <li class="menu-name" id="mntq"><a onclick="ajax_buy()">Mua nhiều tuần qua</a></li>
 
                 </ul>
-                <div class="like-container" style="cursor: pointer;">
+                <div class="like-container" onclick="ajax_like()" style="cursor: pointer;">
                     <i class="glyphicon glyphicon-heart navbar-right btn-lg" id="like_count">
                         <?php
                         // Kiểm tra nếu người dùng đã đăng nhập và có ID người dùng trong session
@@ -264,7 +264,7 @@
         ?>
                     </i>
                 </div>
-                >
+
                 <div class="navbar-form navbar-right searchbox-desktop">
                     <div class="form-group">
                         <input type="text" class="form-control" placeholder="Bạn tìm gì?" id='srch-val'>

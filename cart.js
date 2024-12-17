@@ -54,3 +54,57 @@ $(document).ready(function () {
         $('#cart_count').html(response);
     });
 });
+
+
+// Xử lý chuyển sản phẩm vào giỏ hàng bằng Ajax
+document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', function() {
+        let masp = this.getAttribute('data-masp');
+
+        fetch('xuly_giohang.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'action=add_to_cart&masp=' + masp
+        }).then(response => response.text()).then(data => {
+            alert(data);
+            window.location.reload(); // Tải lại trang sau khi xử lý
+        });
+    });
+});
+
+
+document.querySelectorAll('.delete-from-like').forEach(button => {
+    button.addEventListener('click', function() {
+        let masp = this.getAttribute('data-masp');
+        let productCard = this.closest('.d-flex'); // Tìm phần tử chứa sản phẩm
+
+        fetch('xuly_xoalike.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'action=delete_from_like&masp=' + masp
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(data.message);
+
+                // Xóa phần tử khỏi giao diện
+                productCard.remove();
+
+                // Cập nhật like_count trên giao diện
+                document.getElementById('like_count').innerText = data.like_count;
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        });
+    });
+});
+

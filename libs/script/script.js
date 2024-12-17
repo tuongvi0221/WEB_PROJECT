@@ -370,3 +370,24 @@ function like_action(masp_to_like){
         });
     }
 }
+
+function ajax_like() {
+    $('#spm').removeClass('ajaxing');
+    $('#mntq').removeClass('ajaxing');
+    $('#dgg').removeClass('ajaxing');
+    
+    $.ajax({
+        url: "ajax_calling.php", // Chỉ đường dẫn đến file xử lý
+        type: "get",
+        dataType: "text",
+        data: { fname: 'php_giohangyeuthich' },
+        success: function (result) {
+            console.log(result); // Kiểm tra kết quả trả về từ server
+            $('#content').html(result); // Cập nhật nội dung vào #content
+        },
+        error: function (xhr, status, error) {
+            console.error("AJAX error:", status, error); // Hiển thị lỗi nếu có
+        }
+    });
+}
+
