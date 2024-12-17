@@ -464,102 +464,122 @@ location.reload()
 </script>";
 }
 function signup() {
-session_start();
-$conn = connect();
-mysqli_set_charset($conn, 'utf8');
+    session_start();
+    $conn = connect();
+    mysqli_set_charset($conn, 'utf8');
 
-$name = $un = $pw = $cpw = $addr = $tel = $email = "";
-if(isset($_POST['name'])){
-$name = $_POST['name'];
-}
-if(isset($_POST['un'])){
-$un = $_POST['un'];
-}
-if(isset($_POST['pw'])){
-$pw = $_POST['pw'];
-}
-if(isset($_POST['cpw'])){
-$cpw = $_POST['cpw'];
-}
-if(isset($_POST['addr'])){
-$addr = $_POST['addr'];
-}
-if(isset($_POST['tel'])){
-$tel = $_POST['tel'];
-}
-if(isset($_POST['email'])){
-$email = $_POST['email'];
+    // Lấy các giá trị từ form
+    $name = $un = $pw = $cpw = $addr = $tel = $email = $birthdate = "";
+    if (isset($_POST['name'])) {
+        $name = $_POST['name'];
+    }
+    if (isset($_POST['un'])) {
+        $un = $_POST['un'];
+    }
+    if (isset($_POST['pw'])) {
+        $pw = $_POST['pw'];
+    }
+    if (isset($_POST['cpw'])) {
+        $cpw = $_POST['cpw'];
+    }
+    if (isset($_POST['addr'])) {
+        $addr = $_POST['addr'];
+    }
+    if (isset($_POST['tel'])) {
+        $tel = $_POST['tel'];
+    }
+    if (isset($_POST['email'])) {
+        $email = $_POST['email'];
+    }
+    if (isset($_POST['birthdate'])) {
+        $birthdate = $_POST['birthdate'];
+    }
+
+    // Kiểm tra nếu có trường nào trống
+    if ($name == "" || $un == "" || $pw == "" || $cpw == "" || $addr == "" || $tel == "" || $email == "" || $birthdate == "") {
+        echo "<div class='errorMes'>Không được để trống!</div>";
+        require_once 'signUp.php';
+        return 0;
+    }
+
+    // Kiểm tra mật khẩu nhập lại
+    if ($pw != $cpw) {
+        echo "<div class='errorMes'>Mật khẩu nhập lại không trùng khớp!</div>";
+        require_once 'signUp.php';
+        return 0;
+    }
+
+    // Kiểm tra số điện thoại đúng định dạng (10 chữ số)
+    if (!preg_match("/^\d{10}$/", $tel)) {
+        echo "<div class='errorMes'>Số điện thoại phải gồm 10 chữ số.</div>";
+        require_once 'signUp.php';
+        return 0;
+    }
+
+    // Kiểm tra tuổi (người dùng phải trên 14 tuổi)
+    $birthdateInput = new DateTime($birthdate);
+    $today = new DateTime();
+    $age = $today->diff($birthdateInput)->y;
+
+    if ($age < 14) {
+        echo "<div class='errorMes'>Bạn phải trên 14 tuổi mới có thể đăng ký.</div>";
+        require_once 'signUp.php';
+        return 0;
+    }
+
+    // Sanitize inputs
+    $name = validate_input_sql($conn, $name);
+    $un = validate_input_sql($conn, $un);
+    $pw = validate_input_sql($conn, $pw);
+    $addr = validate_input_sql($conn, $addr);
+    $tel = validate_input_sql($conn, $tel);
+    $email = validate_input_sql($conn, $email);
+
+    // Kiểm tra tên tài khoản đã tồn tại
+    $sqla = "SELECT tentaikhoan FROM thanhvien WHERE tentaikhoan = '" . $un . "'";
+    $resulta = mysqli_query($conn, $sqla);
+
+    if (!$resulta) {
+        echo "<div class='errorMes'>Lỗi truy vấn: " . mysqli_error($conn) . "</div>";
+        require_once 'signUp.php';
+        return 0;
+    }
+
+    if (mysqli_num_rows($resulta) > 0) {
+        echo "<div class='errorMes'>Tên tài khoản đã tồn tại!</div>";
+        require_once 'signUp.php';
+        return 0;
+    }
+
+    // Thực hiện chèn dữ liệu vào bảng thanhvien
+    date_default_timezone_set('Asia/Ho_Chi_Minh');
+    $now = date("Y-m-d h:i:s");
+    $sql = "INSERT INTO thanhvien VALUES
+            ('', '" . $name . "', '" . $un . "', '" . $pw . "', '" . $addr . "', '" . $tel . "', '" . $email . "', '" . $now . "', 0)";
+    $result = mysqli_query($conn, $sql);
+
+    if (!$result) {
+        echo "<div class='errorMes'>" . mysqli_error($conn) . "</div>";
+        require_once 'signUp.php';
+        return 0;
+    } else {
+        // Lấy thông tin người dùng vừa tạo
+        $sql = "SELECT * FROM thanhvien WHERE tentaikhoan = '" . $un . "'";
+        $result = mysqli_query($conn, $sql);
+
+        if (!$result) {
+            echo "<div class='errorMes'>Lỗi truy vấn: " . mysqli_error($conn) . "</div>";
+            require_once 'signUp.php';
+            return 0;
+        }
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $_SESSION['user'] = $row;
+            echo "<script>location.reload()</script>";
+        }
+    }
 }
 
-if($name == "" || $un == "" || $pw == "" || $cpw == "" || $addr == "" || $tel == "" || $email == ""){
-echo "<div class='errorMes'>Không được để trống!</div>";
-require_once 'signUp.php';
-return 0;
-}
-
-if($pw != $cpw){
-echo "<div class='errorMes'>Mật khẩu nhập lại không trùng khớp!</div>";
-require_once 'signUp.php';
-return 0;
-}
-
-// Sanitize inputs
-$name = validate_input_sql($conn, $name);
-$un = validate_input_sql($conn, $un);
-$pw = validate_input_sql($conn, $pw);
-$addr = validate_input_sql($conn, $addr);
-$tel = validate_input_sql($conn, $tel);
-$email = validate_input_sql($conn, $email);
-
-// Check if username exists
-$sqla = "SELECT tentaikhoan FROM thanhvien WHERE tentaikhoan = '".$un."'";
-$resulta = mysqli_query($conn, $sqla);
-
-// Check if the query was successful
-if (!$resulta) {
-echo "<div class='errorMes'>Lỗi truy vấn: " . mysqli_error($conn) . "</div>"; // Display error message
-require_once 'signUp.php';
-return 0;
-}
-
-if(mysqli_num_rows($resulta) > 0){
-echo "<div class='errorMes'>Tên tài khoản đã tồn tại!</div>";
-require_once 'signUp.php';
-return 0;
-}
-
-// Insert new user
-date_default_timezone_set('Asia/Ho_Chi_Minh');
-$now = date("Y-m-d h:i:s");
-$sql = "INSERT INTO thanhvien VALUES
-('','".$name."','".$un."','".$pw."','".$addr."','".$tel."','".$email."','".$now."',0)";
-$result = mysqli_query($conn, $sql);
-
-// Check if the insert was successful
-if (!$result) {
-echo "<div class='errorMes'>".mysqli_error($conn)."</div>";
-require_once 'signUp.php';
-return 0;
-} else {
-// Retrieve the newly created user
-$sql = "SELECT * FROM thanhvien WHERE tentaikhoan = '".$un."'";
-$result = mysqli_query($conn, $sql);
-
-// Check if the query was successful
-if (!$result) {
-echo "<div class='errorMes'>Lỗi truy vấn: " . mysqli_error($conn) . "</div>"; // Display error message
-require_once 'signUp.php';
-return 0;
-}
-
-while ($row = mysqli_fetch_assoc($result)) {
-$_SESSION['user'] = $row;
-echo "<script>
-location.reload()
-</script>";
-}
-}
-}
 
 
 

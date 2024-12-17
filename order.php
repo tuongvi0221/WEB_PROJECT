@@ -139,11 +139,16 @@ window.onload = function() {
                 <div class="form-group">
                     <label for="">Số điện thoại: </label>
                     <input type="text" class="form-control" name="sodt" id="s_sdt" value="<?php 
-                        if($_SESSION['rights'] == 'user'){
-                            echo $_SESSION['user']['sodt'];
-                        }
-                    ?>">
+        if($_SESSION['rights'] == 'user'){
+            echo $_SESSION['user']['sodt'];
+        }
+    ?>">
+                    <small id="error_sdt" class="form-text text-danger" style="display:none;">Số điện thoại không hợp
+                        lệ. Vui lòng nhập lại!</small>
                 </div>
+
+
+
 
                 <!-- Thêm trường Email -->
                 <div class="form-group">
@@ -163,7 +168,7 @@ window.onload = function() {
                     </select>
                 </div>
 
-                <button onclick="check_before_submit()" class="btn btn-primary" type="submit">Đặt Hàng</button><br><br>
+                <button id="submitButton" class="btn btn-primary" type="button">Đặt Hàng</button><br><br>
             </div>
 
 
@@ -219,6 +224,35 @@ function tinh_tien() {
 window.onload = function() {
     tinh_tien()
 }
+</script>
+
+<script>
+// Hàm kiểm tra số điện thoại
+function validatePhoneNumber() {
+    var phoneNumber = document.getElementById("s_sdt").value;
+    var errorMessage = document.getElementById("error_sdt");
+
+    // Kiểm tra định dạng số điện thoại (bắt đầu với 0 và có 10 chữ số)
+    var phoneRegex = /^(0)[0-9]{9}$/;
+
+    if (phoneRegex.test(phoneNumber)) {
+        errorMessage.style.display = "none"; // Ẩn thông báo lỗi nếu đúng định dạng
+        return true;
+    } else {
+        errorMessage.style.display = "block"; // Hiển thị thông báo lỗi nếu sai định dạng
+        return false;
+    }
+}
+
+// Sự kiện khi nhấn nút Đặt Hàng
+document.getElementById("submitButton").addEventListener("click", function(event) {
+    if (validatePhoneNumber()) {
+        document.querySelector("form").submit(); // Submit form nếu số điện thoại hợp lệ
+    } else {
+        event.preventDefault(); // Ngừng submit nếu số điện thoại không hợp lệ
+        alert("Số điện thoại không hợp lệ. Vui lòng nhập lại!");
+    }
+});
 </script>
 
 <?php require_once 'layout/second_footer.php'; ?>

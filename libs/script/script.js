@@ -205,27 +205,52 @@ function call_to_thongtin(){
 		}
 	});
 }
-function call_to_dangky(){
-	var query = 'dang_ky';
-	var name = $('#name').val();
-	var un = $('#username').val();
-	var pw = $('#password').val();
-	var cpw = $('#cpassword').val();
-	var addr = $('#address').val();
-	var tel = $('#tel').val();
-	var email = $('#email').val();
-	$.ajax({
-		url : "backend-index.php",
-		type : "post",
-		dataType:"text",
-		data : {
-			query, name, un, pw, cpw, addr, tel, email
-		},
-		success : function (result){
-			$('#content').html(result);
-		}
-	});
+function call_to_dangky() {
+    var query = 'dang_ky';
+    var name = $('#name').val();
+    var un = $('#username').val();
+    var pw = $('#password').val();
+    var cpw = $('#cpassword').val();
+    var addr = $('#address').val();
+    var tel = $('#tel').val();
+    var email = $('#email').val();
+    var birthdate = $('#birthdate').val();
+
+    // Kiểm tra số điện thoại
+    var phonePattern = /^\d{10}$/; // Kiểm tra số điện thoại có đúng định dạng 10 chữ số
+    if (!phonePattern.test(tel)) {
+        alert("Số điện thoại phải gồm 10 chữ số.");
+        return;
+    }
+
+    // Kiểm tra ngày sinh (14 tuổi)
+    const birthdateInput = new Date(birthdate);
+    const today = new Date();
+    const age = today.getFullYear() - birthdateInput.getFullYear();
+    const isBirthdayPassed =
+        today.getMonth() > birthdateInput.getMonth() ||
+        (today.getMonth() === birthdateInput.getMonth() && today.getDate() >= birthdateInput.getDate());
+    const actualAge = isBirthdayPassed ? age : age - 1;
+
+    if (actualAge < 14) {
+        alert("Bạn phải trên 14 tuổi mới có thể đăng ký.");
+        return;
+    }
+
+    // Nếu mọi thứ hợp lệ, thực hiện gửi dữ liệu
+    $.ajax({
+        url: "backend-index.php",
+        type: "post",
+        dataType: "text",
+        data: {
+            query, name, un, pw, cpw, addr, tel, email, birthdate
+        },
+        success: function (result) {
+            $('#content').html(result);
+        }
+    });
 }
+
 
 function addtocart_action(masp) {
     var query = 'addtocart_action';
