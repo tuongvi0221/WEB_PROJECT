@@ -22,7 +22,7 @@
                 </form>
             </div>
             <div class="col-lg-12" id="copyright-txt">
-                <b>All right reverse, &#169; copyright of 9XWatch.com</b>
+                <b>All right reverse, &#169; copyright of clothes.com</b>
             </div>
         </div>
     </div>

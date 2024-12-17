@@ -81,7 +81,7 @@ if (isset($_SESSION['user'])) {
 
 <body>
     <header>
-        <a href="index.php"><img src="images/header.png">
+        <a href="index.php"><img src="images/logo5.png">
             <h2 class="logo">
                 <div class="">CLothes</div>
             </h2>

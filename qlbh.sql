@@ -1,4 +1,3 @@
-
 -- Tạo bảng categories để lưu trữ thông tin danh mục sản phẩm
 CREATE TABLE IF NOT EXISTS danhmucsp (
     madm INT AUTO_INCREMENT PRIMARY KEY,   -- Khóa chính
@@ -340,3 +339,47 @@ INSERT INTO chitietgiaodich (magd, masp, soluong) VALUES
 (4, 1, 1),  
 (5, 2, 1)   
 ON DUPLICATE KEY UPDATE id=id; -- Không thêm nếu đã có
+
+CREATE TABLE nguoidung (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    email NVARCHAR(255) NOT NULL,
+    password NVARCHAR(255) NOT NULL,
+    birth_date DATE NOT NULL
+);
+
+
+DELIMITER //
+
+CREATE TRIGGER trg_validate_birth_date
+BEFORE INSERT ON nguoidung
+FOR EACH ROW
+BEGIN
+    -- Kiểm tra ngày sinh lớn hơn ngày hiện tại
+    IF NEW.birth_date > CURRENT_DATE THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ngày sinh không hợp lệ: Ngày sinh phải nhỏ hơn hoặc bằng ngày hiện tại.';
+    END IF;
+
+    -- Kiểm tra người dùng chưa đủ 14 tuổi
+    IF TIMESTAMPDIFF(YEAR, NEW.birth_date, CURRENT_DATE) < 14 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Ngày sinh không hợp lệ: Người dùng phải đủ 14 tuổi.';
+    END IF;
+END;
+//
+
+DELIMITER ;
+
+
+-- Trường hợp hợp lệ:
+INSERT INTO nguoidung (email, password, birth_date)
+VALUES ('testuser@gmail.com', 'password123', '2010-12-13');  -- Người này đã 14 tuổi
+
+
+-- Trường hợp không hợp lệ (ngày sinh > ngày hiện tại):
+INSERT INTO nguoidung (email, password, birth_date)
+VALUES ('futureuser@gmail.com', 'password123', '2025-01-01'); -- Ngày sinh trong tương lai
+
+-- Trường hợp không hợp lệ (chưa đủ 14 tuổi):
+INSERT INTO nguoidung (email, password, birth_date)
+VALUES ('younguser@gmail.com', 'password123', '2012-12-14'); -- Chưa đủ 14 tuổi

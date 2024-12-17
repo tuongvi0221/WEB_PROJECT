@@ -1,4 +1,4 @@
-﻿function load_more(current){
+﻿﻿function load_more(current){
 	var fname = 'load_more';
 	var x = current+1;
 	$('#loadmorebtn').attr('onclick','load_more('+x+')');
@@ -342,30 +342,31 @@ function check_before_submit(){
 }
 
 function like_action(masp_to_like){
-	if($('#s-s').data("stt") == "nosignin"){
-		$('.like-error').toggle("500");
-	}else{
-		var query = 'like';
-		if(!$("#like_count").hasClass('clicked')){
-			$("#like_count").addClass('like_count');
-			$("#like_count").addClass(' animated tada');
-		} else {
-			$("#like_count").removeClass(' tada');
-			$("#like_count").addClass(' flipInX');
-		}
-		setTimeout(function(){$("#like_count").removeClass(' flipInX');}, 1000)
-		$("#like_count").addClass('clicked');
-		$.ajax({
-			url : "backend-index.php",
-			type : "post",
-			dataType:"text",
-			data : {
-				query, masp_to_like
-			},
-			success : function (result){
-				$('#like_count').html(result);
-			}
-		});
-	}
-	
+    if($('#s-s').data("stt") == "nosignin"){
+        $('.like-error').toggle("500");
+    } else {
+        var query = 'like';
+        if(!$("#like_count").hasClass('clicked')){
+            $("#like_count").addClass('like_count');
+            $("#like_count").addClass(' animated tada');
+        } else {
+            $("#like_count").removeClass(' tada');
+            $("#like_count").addClass(' flipInX');
+        }
+        setTimeout(function(){$("#like_count").removeClass(' flipInX');}, 1000)
+        $("#like_count").addClass('clicked');
+        $.ajax({
+            url: "backend-index.php",
+            type: "POST",
+            dataType: "text",
+            data: {
+                query, 
+                masp_to_like
+            },
+            success: function(result) {
+                // Cập nhật lại số lượng yêu thích khi trả về từ server
+                $('#like_count').html(result);
+            }
+        });
+    }
 }

@@ -568,31 +568,57 @@ $_GET['masp'] = $m;
 require_once 'sanpham.php';
 }
 
-function like(){
-session_start();
-$masp = "";
-if(isset($_POST['masp_to_like'])){
-$masp = $_POST['masp_to_like'];
-}
-$pos = "";
-$pos = array_search($masp, $_SESSION['like']);
-if($pos != ""){
-unset($_SESSION['like'][$pos]);
-echo count($_SESSION['like'])-1;
-} else {
-$_SESSION['like'][] = $masp;
-echo count($_SESSION['like'])-1;
-}
-$conn = connect();
+function like() {
+    session_start();
 
-$sql = "";
-if($pos != ""){
-$sql = "DELETE FROM sanphamyeuthich WHERE user_id = '".$_SESSION['user']['id']."' AND masp = '".$masp."'";
-} else {
-$sql = "INSERT INTO sanphamyeuthich VALUES ('".$_SESSION['user']['id']."','".$masp."')";
-}
-$result = mysqli_query($conn, $sql);
-if(!$result){echo "Loi them sp yeu thich";}
+    // Lấy mã sản phẩm từ POST
+    $masp = isset($_POST['masp_to_like']) ? $_POST['masp_to_like'] : "";
+
+    // Kiểm tra xem người dùng đã đăng nhập chưa
+    if (!isset($_SESSION['user']['id'])) {
+        echo "0"; // Nếu chưa đăng nhập, trả về 0
+        return;
+    }
+
+    // Lấy user_id từ session
+    $user_id = $_SESSION['user']['id'];
+
+    // Kết nối cơ sở dữ liệu
+    $conn = connect();
+    if (!$conn) {
+        echo "Lỗi kết nối cơ sở dữ liệu.";
+        return;
+    }
+
+    // Kiểm tra sản phẩm trong danh sách yêu thích
+    $check_sql = "SELECT COUNT(*) AS count FROM sanphamyeuthich WHERE user_id = ? AND masp = ?";
+    $stmt = $conn->prepare($check_sql);
+    $stmt->bind_param("ss", $user_id, $masp);
+    $stmt->execute();
+    $result_check = $stmt->get_result()->fetch_assoc();
+
+    if ($result_check['count'] == 0) {
+        // Nếu chưa có sản phẩm yêu thích, thêm vào cơ sở dữ liệu
+        $sql = "INSERT INTO sanphamyeuthich (user_id, masp) VALUES (?, ?)";
+    } else {
+        // Nếu đã có, xóa sản phẩm khỏi cơ sở dữ liệu
+        $sql = "DELETE FROM sanphamyeuthich WHERE user_id = ? AND masp = ?";
+    }
+
+    // Thực thi SQL
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $user_id, $masp);
+    if ($stmt->execute()) {
+        // Trả về số lượng yêu thích sau khi thực hiện thao tác
+        $count_sql = "SELECT COUNT(*) AS like_count FROM sanphamyeuthich WHERE user_id = ?";
+        $stmt = $conn->prepare($count_sql);
+        $stmt->bind_param("s", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        echo $result['like_count'];
+    } else {
+        echo "Lỗi cập nhật cơ sở dữ liệu.";
+    }
 }
 
 

@@ -11,6 +11,7 @@ require 'vendor/PHPMailer/src/SMTP.php';
 
 require_once 'backend-index.php';
 require_once 'layout/second_header.php';
+
 $ten = $quan = $dc = $sodt = $money = $sl = 0; // Khởi tạo biến với giá trị 0
 if(isset($_POST['ten'])){
 	$ten = $_POST['ten'];
@@ -69,7 +70,7 @@ if($money == 0){
             <i>Quý khách sẽ sớm nhận được cuộc gọi xác nhận của chúng tôi, giá trị đơn hàng này là
                 <b><?php echo number_format($money, 0, ","," ") ?> VND</b> và sẽ được thanh toán sau khi nhận hàng!</i>
             <a href="index.php">Quay lại trang chủ</a>
-            <img src="images/tks4buying.png">
+            <img src="images/clothes/tks4buying.png" width="100">
         </div>
     </div>
 </div>
@@ -80,7 +81,7 @@ if($_SESSION['rights'] == "user"){
 	if ($_SESSION['rights'] == 'user') {
 		// Lấy email từ cơ sở dữ liệu
 		$userId = $_SESSION['user']['id'];
-		$query = "SELECT email FROM users WHERE id = '$userId'";
+		$query = "SELECT email FROM thanhvien WHERE id = '$userId'";
 		$result = mysqli_query($conn, $query);
 		$row = mysqli_fetch_assoc($result);
 		$email = $row['email'];
@@ -110,15 +111,24 @@ if($_SESSION['rights'] == "user"){
 		// Tạo nội dung chi tiết đơn hàng
 		$orderDetails = "<ul>";
 		for ($i = 0; $i < count($sl); $i++) {
-				$productName = $_SESSION['product_names'][$i]; // Tên sản phẩm
+				$productName = $_SESSION['product_names'][$i]; // Lấy tên sản phẩm từ session
 				$quantity = $sl[$i];
 				$price = number_format($_SESSION['cost'][$i], 0, ",", ".") . " VND";
 				$totalPrice = number_format($quantity * $_SESSION['cost'][$i], 0, ",", ".") . " VND";
-				
 				$orderDetails .= "<li> Sản phẩm: $productName, Số lượng: $quantity, Đơn giá: $price, Thành tiền: $totalPrice </li>";
 		}
+		$orderDetails .= "<ul>";
+
+		$orderDetails = "<ul>";
+		for ($i = 0; $i < count($sl); $i++) {
+			$productName = $_SESSION['product_names'][$i];
+			$quantity = $sl[$i];
+			$price = number_format($_SESSION['cost'][$i], 0, ",", ".");
+			$totalPrice = number_format($quantity * $_SESSION['cost'][$i], 0, ",", ".");
+			$orderDetails .= "<li>Sản phẩm: $productName, Số lượng: $quantity, Đơn giá: $price, Thành tiền: $totalPrice</li>";
+		}
 		$orderDetails .= "</ul>";
-	
+
 		// Thiết lập nội dung email mới
 		$mail->isHTML(true);
 		$mail->Subject = "Đơn hàng của bạn đã được đặt thành công";
@@ -138,40 +148,47 @@ if($_SESSION['rights'] == "user"){
 	}
 	
 }
-$sql = "INSERT INTO giaodich VALUES ('',0,'".$user_id."','".$ten."','".$quan."','".$dc."','".$sodt."','".$money."','".$now."')";
-if(!mysqli_query($conn, $sql)){
-	echo "Đã xảy ra một lỗi nhỏ trong quá trình đặt hàng, vui lòng đặt hàng lại!";
-	
-}
-$sql = "SELECT magd FROM giaodich WHERE magd = LAST_INSERT_ID()";
-$result = mysqli_query($conn, $sql);
-if(!$result){
-	echo "Lỗi không xác định, nhưng không sao, đơn hàng của bạn đã được đặt thành công!";
-}
-while($row = mysqli_fetch_assoc($result)){
-	$last_magd = $row['magd'];
-}
-$sql_multi = array();
-$buynow = "";
-if(isset($_SESSION['buynow'])){
-	$buynow = $_SESSION['buynow'];
-	$sql = "INSERT INTO chitietgd VALUES ('".$last_magd."','".$buynow."','".$sl[0]."')";
-	require_once 'layout/second_footer.php';
-	return 0;
+
+$sql = "INSERT INTO giaodich (user_id, user_name, user_dst, user_addr, user_phone, tongtien, date) 
+        VALUES ('$userId', '$ten', '$quan', '$dc', '$sodt', '$money', '$now')";
+
+if (!mysqli_query($conn, $sql)) {
+    error_log("Error inserting into giaodich: " . mysqli_error($conn));
+    echo "<script>alert('Đã xảy ra lỗi, vui lòng thử lại sau!');</script>";
+    return;
 }
 
-if($_SESSION['rights'] == "user"){
-	$new_masp = $_SESSION['user_cart'];
+$last_magd = mysqli_insert_id($conn);
+if (!$last_magd) {
+    error_log("Failed to retrieve last inserted ID: " . mysqli_error($conn));
+    echo "<script>alert('Lỗi không xác định, nhưng đơn hàng của bạn đã được đặt.');</script>";
+    return;
+}
+
+$sql_multi = [];
+if (isset($_SESSION['buynow'])) {
+    $sql_multi[] = "('{$last_magd}', '{$_SESSION['buynow']}', '{$sl[0]}')";
+		require_once 'layout/second_footer.php';
+
 } else {
-	$new_masp = $_SESSION['client_cart'];
+    $cart = ($_SESSION['rights'] === "user") ? $_SESSION['user_cart'] : $_SESSION['client_cart'];
+    array_shift($cart); 
+    foreach ($cart as $index => $masp) {
+        $sql_multi[] = "('{$last_magd}', '{$masp}', '{$sl[$index]}')";
+    }
 }
 
-array_shift($new_masp);
-for($i = 0; $i < count($new_masp); $i++){
-	$sql_multi[] = "INSERT INTO chitietgd VALUES ('".$last_magd."','".$new_masp[$i]."','".$sl[$i]."')";
+if (!empty($sql_multi)) {
+    $sql_query = "INSERT INTO chitietgiaodich (magd, masp, soluong) VALUES " . implode(',', $sql_multi);
+    if (!mysqli_query($conn, $sql_query)) {
+        error_log("Error inserting chitietgiaodich: " . mysqli_error($conn));
+        echo "<script>alert('Lỗi trong quá trình xử lý đơn hàng.');</script>";
+        return;
+    }
 }
-for($i = 0; $i < count($sql_multi); $i++){
-	$result = mysqli_query($conn, $sql_multi[$i]);
-}
+
 require_once 'layout/second_footer.php';
+
+unset($_SESSION['user_cart'], $_SESSION['client_cart'], $_SESSION['product_names'], $_SESSION['cost'], $_SESSION['buynow']);
+
 ?>

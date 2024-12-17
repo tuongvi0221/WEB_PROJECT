@@ -226,10 +226,23 @@
                 <div class="like-container" style="cursor: pointer;">
                     <i class="glyphicon glyphicon-heart navbar-right btn-lg" id="like_count">
                         <?php
-                        if (isset($_SESSION['like'])) {
-                            echo count($_SESSION['like']);
+                        // Kiểm tra nếu người dùng đã đăng nhập và có ID người dùng trong session
+                        if (isset($_SESSION['user']['id'])) {
+                            // Lấy số lượng sản phẩm yêu thích từ cơ sở dữ liệu
+                            $conn = connect(); // Kết nối cơ sở dữ liệu
+                            if ($conn) {
+                                $user_id = $_SESSION['user']['id'];
+                                $sql = "SELECT COUNT(*) AS like_count FROM sanphamyeuthich WHERE user_id = ?";
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param("s", $user_id);
+                                $stmt->execute();
+                                $result = $stmt->get_result()->fetch_assoc();
+                                echo $result['like_count'] > 0 ? $result['like_count'] : "0"; // Mặc định là 0 nếu không có sản phẩm yêu thích
+                            } else {
+                                echo "0";
+                            }
                         } else {
-                            echo "0"; // Mặc định là 0 nếu không có sản phẩm yêu thích
+                            echo "0"; // Nếu người dùng chưa đăng nhập
                         }
                         ?>
                     </i>

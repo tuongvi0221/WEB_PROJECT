@@ -69,18 +69,27 @@ window.onload = function() {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = mysqli_fetch_assoc($result)) { 
-                            $_SESSION['product_names'][] = $row['tensp']; // Lưu tên sản phẩm  
+                        <?php 
+                        // Khởi tạo mảng nếu chưa tồn tại
+                        if (!isset($_SESSION['product_names'])) {
+                            $_SESSION['product_names'] = [];
+                        }
+
+                        // Trong vòng lặp lưu tên sản phẩm vào session
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            $_SESSION['product_names'][] = $row['tensp']; 
                         ?>
                         <tr>
                             <td><img src="<?php echo $row['anhchinh'] ?>" style="width: 70px"></td>
                             <td><?php echo $row['tensp'] ?></td>
                             <td class="cost" data-val="<?php echo $row['gia'] ?>">
-                                <?php echo $row['gia']; $_SESSION['cost'][] = $row['gia']; ?></td>
+                                <?php echo $row['gia']; $_SESSION['cost'][] = $row['gia']; ?>
+                            </td>
                             <td width="30px"><input type="number" name="sl[]" value='1' min="0" onchange="tinh_tien()">
                             </td>
                         </tr>
                         <?php } ?>
+
                         <tr style="color: green; font-size: 18px;">
                             <th colspan="2">Tổng tiền</th>
                             <th id="tong_tien"></th>
@@ -152,8 +161,6 @@ window.onload = function() {
                     <label for="">Phương thức thanh toán: </label>
                     <select class="form-control" name="payment_method" id="s_payment_method">
                         <option value="COD">COD (Thanh toán khi nhận hàng)</option>
-                        <option value="Internet Banking">Internet Banking</option>
-                        <option value="Credit Card">Thẻ tín dụng</option>
                     </select>
                 </div>
 

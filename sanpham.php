@@ -90,13 +90,14 @@ while ($row = mysqli_fetch_assoc($result)) {
                         </tr>
 
                         <tr>
-                            <td>Khuyễn mãi/ Quà tặng</td>
+                            <td>Khuyến mãi/ Quà tặng</td>
                             <td><?php echo htmlspecialchars($row['khuyenmai']); ?></td>
                         </tr>
 
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
 </div>
