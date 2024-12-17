@@ -306,7 +306,7 @@ BEGIN
 
     -- Nếu ngày hiện tại đã qua 3 ngày từ ngày dự kiến nhận, cập nhật trạng thái giao dịch
     IF DATEDIFF(NEW.ngay_du_kien_nhan, ngay_hien_tai) <= 3 THEN
-        UPDATE giao_dich SET trang_thai = 1 WHERE ma_giao_dich = NEW.ma_sp;
+        UPDATE giaodich SET tinhtrang = 1 WHERE magd= NEW.ma_sp;
     END IF;
 END$$
 

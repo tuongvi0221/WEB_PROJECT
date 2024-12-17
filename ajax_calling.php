@@ -29,9 +29,6 @@ switch ($fname) {
 	case 'php_giohang':
 	php_giohang();
 	break;
-	case 'php_like':
-	php_like();
-	break;
 	case 'php_search':
 	php_search();
 	break;
@@ -39,8 +36,7 @@ switch ($fname) {
 	load_more();
 	break;
 
-	default:
-	echo "Yêu cầu không tìm thấy!";		
+		
 }
 function load_more() {
     session_start();

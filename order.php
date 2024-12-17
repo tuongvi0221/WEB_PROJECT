@@ -13,9 +13,8 @@ if(isset($_GET['q'])){
     $q = $_GET['q'];
     if($q == 'multi'){
         if($_SESSION['rights'] == "default"){
-            if(isset($_SESSION['client_cart']) && count($_SESSION['client_cart']) > 1){
+            if(isset($_SESSION['client_cart']) && count($_SESSION['client_cart']) > 0){
                 $tmpArr = $_SESSION['client_cart'];
-                array_shift($tmpArr);
                 $x = '('.implode(',',$tmpArr).')';
                 $sql = "SELECT * FROM sanpham WHERE masp in ".$x."";
             } else {
