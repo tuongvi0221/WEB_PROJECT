@@ -347,134 +347,37 @@ function php_buy() {
 
 
 
-//Danh muc san pham
 function php_danhmucsp() {
     session_start();
     $conn = connect();
     mysqli_set_charset($conn, 'utf8');
-    $detail = "";
 
-    if (isset($_GET['detail'])) {
-        $detail = strtolower($_GET['detail']);
-    }
+    // Lấy tham số 'detail' từ URL
+    $detail = isset($_GET['detail']) ? strtolower($_GET['detail']) : "";
 
+    // Biến chứa câu truy vấn SQL
     $sql = "";
 
-    switch ($detail) {
-        case 'all':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm WHERE sp.madm = dm.madm ORDER BY sp.gia ASC";
-            break;
-    
-        case 'ao_khoac':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
-                    WHERE sp.madm = dm.madm 
-                    AND sp.masp IN (
-                        SELECT masp FROM sanpham 
-                        WHERE madm IN (
-                            SELECT madm FROM danhmucsp WHERE tendm = 'Áo Khoác'
-                        )
-                    ) 
-                    ORDER BY sp.gia ASC";
-            break;
-    
-        case 'ao_thun':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
-                    WHERE sp.madm = dm.madm 
-                    AND sp.masp IN (
-                        SELECT masp FROM sanpham 
-                        WHERE madm IN (
-                            SELECT madm FROM danhmucsp WHERE tendm = 'Áo Thun'
-                        )
-                    ) 
-                    ORDER BY sp.gia ASC";
-            break;
-    
-        case 'ao_so_mi':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
-                    WHERE sp.madm = dm.madm 
-                    AND sp.masp IN (
-                        SELECT masp FROM sanpham 
-                        WHERE madm IN (
-                            SELECT madm FROM danhmucsp WHERE tendm = 'Áo Sơ Mi'
-                        )
-                    ) 
-                    ORDER BY sp.gia ASC";
-            break;
-    
-        case 'ao_hoodie':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
-                    WHERE sp.madm = dm.madm 
-                    AND sp.madm IN (
-                        SELECT madm FROM danhmucsp WHERE tendm = 'Áo Hoodie'
-                    ) 
-                    ORDER BY sp.gia ASC";
-            break;
-    
-        case 'quan':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
-                    WHERE sp.madm = dm.madm 
-                    AND sp.masp IN (
-                        SELECT masp FROM sanpham 
-                        WHERE madm IN (
-                            SELECT madm FROM danhmucsp WHERE tendm = 'Quần'
-                        )
-                    ) 
-                    ORDER BY sp.gia ASC";
-            break;
-    
-        case 'dam':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
-                    WHERE sp.madm = dm.madm 
-                    AND sp.masp IN (
-                        SELECT masp FROM sanpham 
-                        WHERE madm IN (
-                            SELECT madm FROM danhmucsp WHERE tendm = 'Đầm'
-                        )
-                    ) 
-                    ORDER BY sp.gia ASC";
-            break;
-    
-        case 'phu_kien':
-            $sql = "SELECT * FROM sanpham sp, danhmucsp dm 
-                    WHERE sp.madm = dm.madm 
-                    AND sp.masp IN (
-                        SELECT masp FROM sanpham 
-                        WHERE madm IN (
-                            SELECT madm FROM danhmucsp WHERE tendm = 'Phụ Kiện'
-                        )
-                    ) 
-                    ORDER BY sp.gia ASC";
-            break;
-    
-        default:
-            echo "<p>Danh mục không hợp lệ.</p>";
-            disconnect($conn);
-            return;
+    // Kiểm tra tham số 'detail' và xây dựng câu truy vấn tương ứng
+    if ($detail == 'all') {
+        $sql = "SELECT * FROM sanpham sp 
+                JOIN danhmucsp dm ON sp.madm = dm.madm 
+                ORDER BY sp.gia ASC";
+    } else {
+        // Sử dụng câu lệnh SQL để chọn sản phẩm theo tên danh mục
+        $sql = "SELECT * FROM sanpham sp 
+                JOIN danhmucsp dm ON sp.madm = dm.madm 
+                WHERE dm.tendm = '$detail' 
+                ORDER BY sp.gia ASC";
     }
-    
 
-    // Lưu lại truy vấn SQL ban đầu
-    $sqlx = $sql;
-    // Giới hạn số lượng kết quả hiển thị
-    $sql .= " LIMIT " . $_SESSION['limit'];
-
-    // Thực hiện truy vấn SQL
+    // Thực hiện truy vấn SQL ban đầu
     $result = mysqli_query($conn, $sql);
 
-    // Kiểm tra xem truy vấn có thành công không
-    if (!$result) {
-        error_log("Lỗi truy vấn: " . mysqli_error($conn)); // Ghi log lỗi vào file log
-        echo "Lỗi truy vấn: " . mysqli_error($conn);
-        disconnect($conn);
-        return; // Dừng thực thi nếu có lỗi
-    }
-
-    // Kiểm tra xem có sản phẩm nào không
-    if (mysqli_num_rows($result) == 0) {
-        echo "<p>Không có sản phẩm nào trong danh mục này.</p>";
-    } else {
+    // Kiểm tra và hiển thị kết quả
+    if (mysqli_num_rows($result) > 0) {
         echo "<h3>Danh mục sản phẩm / " . ucwords($detail) . "</h3>";
-        
+
         // Lặp qua kết quả và hiển thị từng sản phẩm
         while ($row = mysqli_fetch_assoc($result)) {
             ?>
@@ -490,18 +393,81 @@ function php_danhmucsp() {
                 VND</b>
             <div class='buy'>
                 <a onclick="like_action('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')" class='btn btn-default btn-md unlike-container <?php
-                                    if ($_SESSION['rights'] == 'user' && in_array($row['masp'], $_SESSION['like'])) {
-                                        echo 'liked';
-                                    }
+                                if ($_SESSION['rights'] == 'user' && in_array($row['masp'], $_SESSION['like'])) {
+                                    echo 'liked';
+                                }
                             ?>'>
                     <i class='glyphicon glyphicon-heart unlike'></i>
                 </a>
                 <a class='btn btn-primary btn-md cart-container <?php 
-                                    if (($_SESSION['rights'] == "default" && in_array($row['masp'], $_SESSION['client_cart'])) || 
-                                        ($_SESSION['rights'] != "default" && in_array($row['masp'], $_SESSION['user_cart']))) {
-                                        echo 'cart-ordered';
-                                    }
-                                ?>' data-masp='<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'
+                                if (($_SESSION['rights'] == "default" && in_array($row['masp'], $_SESSION['client_cart'])) || 
+                                    ($_SESSION['rights'] != "default" && in_array($row['masp'], $_SESSION['user_cart']))) {
+                                    echo 'cart-ordered';
+                                }
+                            ?>' data-masp='<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'
+                    onclick="addtocart_action('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')">
+                    <i title='Thêm vào giỏ hàng' class='glyphicon glyphicon-shopping-cart cart-item'></i>
+                </a>
+                <a class="snip0050" href='order.php?masp=<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'>
+                    <span>Mua ngay</span>
+                    <i class="glyphicon glyphicon-ok"></i>
+                </a>
+            </div>
+        </div>
+    </a>
+</div>
+<?php
+        }
+    } else {
+        echo "<p>Không có sản phẩm nào trong danh mục này.</p>";
+    }
+
+    // Lưu lại truy vấn SQL ban đầu và giới hạn số lượng kết quả hiển thị
+    $_SESSION['sql'] = $sql;
+
+    // Thực hiện truy vấn SQL với giới hạn
+    $sql .= " LIMIT " . $_SESSION['limit'];
+    $result = mysqli_query($conn, $sql);
+
+    // Kiểm tra xem truy vấn có thành công không
+    if (!$result) {
+        error_log("Lỗi truy vấn: " . mysqli_error($conn)); // Ghi log lỗi vào file log
+        echo "Lỗi truy vấn: " . mysqli_error($conn);
+        disconnect($conn);
+        return; // Dừng thực thi nếu có lỗi
+    }
+
+    // Kiểm tra xem có sản phẩm nào không
+    if (mysqli_num_rows($result) == 0) {
+        echo "<p>Không có sản phẩm nào trong danh mục này.</p>";
+    } else {
+        // Hiển thị các sản phẩm với dữ liệu đã giới hạn
+        while ($row = mysqli_fetch_assoc($result)) {
+            ?>
+<div class='product-container' onclick="hien_sanpham('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')">
+    <a data-toggle='modal' href='sanpham.php?masp=<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'
+        data-target='#modal-id'>
+        <div style="text-align: center;" class='product-img'>
+            <img src='<?php echo htmlspecialchars($row['anhchinh'], ENT_QUOTES); ?>' alt='Hình sản phẩm'>
+        </div>
+        <div class='product-info'>
+            <h4><b><?php echo htmlspecialchars($row['tensp'], ENT_QUOTES); ?></b></h4>
+            <b class='price'>Giá: <?php echo number_format(htmlspecialchars($row['gia'], ENT_QUOTES), 0, ',', '.'); ?>
+                VND</b>
+            <div class='buy'>
+                <a onclick="like_action('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')" class='btn btn-default btn-md unlike-container <?php
+                                if ($_SESSION['rights'] == 'user' && in_array($row['masp'], $_SESSION['like'])) {
+                                    echo 'liked';
+                                }
+                            ?>'>
+                    <i class='glyphicon glyphicon-heart unlike'></i>
+                </a>
+                <a class='btn btn-primary btn-md cart-container <?php 
+                                if (($_SESSION['rights'] == "default" && in_array($row['masp'], $_SESSION['client_cart'])) || 
+                                    ($_SESSION['rights'] != "default" && in_array($row['masp'], $_SESSION['user_cart']))) {
+                                    echo 'cart-ordered';
+                                }
+                            ?>' data-masp='<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>'
                     onclick="addtocart_action('<?php echo htmlspecialchars($row['masp'], ENT_QUOTES); ?>')">
                     <i title='Thêm vào giỏ hàng' class='glyphicon glyphicon-shopping-cart cart-item'></i>
                 </a>
@@ -517,16 +483,15 @@ function php_danhmucsp() {
         }
     }
 
-    // Đóng kết nối
+    // Đóng kết nối cơ sở dữ liệu
     disconnect($conn);
-    // Lưu lại truy vấn SQL ban đầu vào session
-    $_SESSION['sql'] = $sqlx;
     ?>
 <div class="container-fluid text-center">
     <button onclick="load_more(0)" id="loadmorebtn" class="snip1582">Load more</button>
 </div>
 <?php
 }
+
 
 
 function php_dangky(){

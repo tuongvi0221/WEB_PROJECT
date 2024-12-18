@@ -207,16 +207,38 @@
                     <li class="dropdown menu-name">
                         <a class="dropdown-toggle" data-toggle="dropdown" style="cursor: pointer;">Danh mục sản phẩm <b
                                 class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a onclick="ajax_danhmucsp('all')">Tất cả sản phẩm</a></li>
-                            <li><a onclick="ajax_danhmucsp('ao_khoac')">Áo Khoác</a></li>
-                            <li><a onclick="ajax_danhmucsp('ao_thun')">Áo Thun</a></li>
-                            <li><a onclick="ajax_danhmucsp('ao_so_mi')">Áo Sơ Mi</a></li>
-                            <li><a onclick="ajax_danhmucsp('ao_hoodie')">Áo Hoodie</a></li>
-                            <li><a onclick="ajax_danhmucsp('quan')">Quần</a></li>
-                            <li><a onclick="ajax_danhmucsp('dam')">Đầm</a></li>
-                            <li><a onclick="ajax_danhmucsp('phu_kien')">Phụ kiện</a></li>
-                        </ul>
+                        <?php
+                        // Kết nối cơ sở dữ liệu
+                        $conn = mysqli_connect('localhost', 'root', '', 'qlbh'); // Thay thế thông tin kết nối nếu cần
+
+                        if (!$conn) {
+                            die("Kết nối thất bại: " . mysqli_connect_error());
+                        }
+
+                        // Truy vấn lấy tất cả các danh mục sản phẩm
+                        $sql = "SELECT tendm FROM danhmucsp"; // Truy vấn lấy tên danh mục
+                        $result = mysqli_query($conn, $sql); // Thực thi truy vấn
+
+                        // Kiểm tra và hiển thị các danh mục vào menu
+                        if (mysqli_num_rows($result) > 0) {
+                            echo '<ul class="dropdown-menu">';
+                            echo '<li><a onclick="ajax_danhmucsp(\'all\')">Tất cả sản phẩm</a></li>'; // Mục 'Tất cả sản phẩm'
+
+                            // Duyệt qua các danh mục và hiển thị chúng
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                $tendm = $row['tendm'];
+                                echo "<li><a onclick=\"ajax_danhmucsp('$tendm')\">$tendm</a></li>"; // Hiển thị tên danh mục
+                            }
+                            
+                            echo '</ul>';
+                        } else {
+                            echo '<ul class="dropdown-menu"><li>Không có danh mục nào</li></ul>';
+                        }
+
+                        // Đóng kết nối
+                        mysqli_close($conn);
+                        ?>
+
                     </li>
                     <li class="menu-name" id="dgg"><a onclick="ajax_saling()">Đang giảm giá</a></li>
                     <li class="menu-name" id="spm"><a onclick="ajax_new()">Sản phẩm mới</a></li>
