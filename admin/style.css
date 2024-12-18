@@ -1,25 +1,44 @@
+/* Tổng quan */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container */
+.container-fluid {
+    padding: 20px;
+}
+
+/* Tiêu đề */
+h3.text-primary, h4.text-warning {
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Card */
 .card {
     border-radius: 10px;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
-.card h3 {
+/* Tiêu đề card */
+.card h3, .card h4 {
+    margin-top: 0;
     font-size: 1.5rem;
     color: #007bff;
 }
 
-.form-label {
-    font-weight: bold;
-    color: #333;
-}
-
-input[type="file"] {
-    cursor: pointer;
-}
-
-#sp_error {
-    font-size: 0.9rem;
+/* Nút hành động */
+.btn-success, .btn-info, .btn-primary, .btn-danger, .btn-secondary {
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .btn-success {
@@ -32,26 +51,8 @@ input[type="file"] {
     border-color: #dc3545;
 }
 
-/* Tổng quan */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
-}
-
-.container-fluid {
-    padding: 20px;
-}
-
-/* Tiêu đề */
-h3.text-primary, h4.text-warning {
-    margin-bottom: 20px;
-    font-weight: bold;
-}
-
-/* Nút hành động */
-.btn-success, .btn-info, .btn-primary, .btn-danger, .btn-secondary {
-    font-size: 16px;
-    padding: 10px 20px;
+.btn-success:hover, .btn-danger:hover {
+    opacity: 0.8;
 }
 
 .btn-success i, .btn-info i {
@@ -62,68 +63,94 @@ h3.text-primary, h4.text-warning {
 .form-control {
     font-size: 14px;
     padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    transition: border-color 0.3s ease;
 }
 
-#custom-search-input {
-    margin-bottom: 20px;
+.form-control:focus {
+    border-color: #007bff;
 }
 
-#custom-search-input .input-group {
+/* Tùy chỉnh các input loại file */
+input[type="file"] {
+    cursor: pointer;
+    border: 1px solid #ddd;
+    padding: 5px;
     border-radius: 5px;
 }
 
-#custom-search-input input {
-    border-right: none;
-    box-shadow: none;
+/* Tùy chỉnh label */
+.form-label {
+    font-weight: bold;
+    color: #333;
+    font-size: 1.1rem;
 }
 
-#custom-search-input .btn-info {
-    border-left: none;
-    border-radius: 0 5px 5px 0;
-}
-
-/* Bảng sản phẩm */
+/* Tùy chỉnh cho các bảng */
 .table {
     font-size: 14px;
     border: 1px solid #ddd;
+    border-collapse: collapse;
+    width: 100%;
 }
 
 .table th {
     background-color: #007bff;
     color: #fff;
     text-align: center;
+    padding: 12px;
 }
 
 .table-hover tbody tr:hover {
     background-color: #f1f1f1;
 }
 
-.table-responsive {
-    margin-top: 20px;
-}
-
 .table thead th, .table tbody td {
     vertical-align: middle;
+    padding: 10px;
 }
 
-/* Form thêm/sửa sản phẩm */
-.card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #fff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Thiết kế cho form tìm kiếm */
+#custom-search-input {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.card h3, .card h4 {
-    margin-top: 0;
-}
-
-.card .form-label {
-    font-weight: bold;
-}
-
-.card .form-control {
+#custom-search-input .input-group {
+    width: 100%;
     border-radius: 5px;
+}
+
+#custom-search-input input {
+    border-right: none;
+    border-radius: 20px;
+    box-shadow: none;
+    padding: 12px;
+}
+
+#custom-search-input button {
+    border-radius: 50%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+#custom-search-input button:hover {
+    background-color: #0056b3;
+}
+
+/* Form dropdown (select category) */
+#category-dropdown select {
+    font-size: 1.5rem;
+    height: 5rem;
+    border-radius: 5px;
+    padding: 10px;
+    border: 1px solid #ddd;
 }
 
 /* Cải thiện thiết kế của bảng sản phẩm */
@@ -138,26 +165,66 @@ h3.text-primary, h4.text-warning {
     margin: 5px;
 }
 
-/* Tùy chỉnh cho form tìm kiếm */
-#custom-search-input .input-group {
-    width: 100%;
+/* Cải thiện hiển thị của thông báo lỗi */
+#sp_error {
+    font-size: 0.9rem;
+    color: #dc3545;
+    margin-top: 10px;
 }
 
-#custom-search-input input {
-    border-radius: 20px;
-}
-
-#custom-search-input button {
-    border-radius: 50%;
-}
-
-/* Thiết kế cho các form sửa và thêm sản phẩm */
-.card {
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Thêm khoảng cách cho các trường form */
-.form-label {
+/* Card cho form thêm/sửa sản phẩm */
+.card .form-label {
     font-weight: bold;
+}
+
+.card .form-control {
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    padding: 12px;
+}
+
+
+/* Cải thiện kiểu dáng cho cột "Hành động" */
+#tbl-sanpham-combobox tbody td:last-child {
+    text-align: center;
+    background-color: #f8f9fa; /* Màu nền cho cột hành động */
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+/* Đảm bảo các nút trong cột "Hành động" có nền đồng đều */
+#tbl-sanpham-combobox tbody td:last-child button {
+    background-color: #007bff;
+    border: 1px solid #007bff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+/* Thêm hiệu ứng hover cho các nút hành động */
+#tbl-sanpham-combobox tbody td:last-child button:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Các nút xóa hoặc sửa */
+#tbl-sanpham-combobox tbody td:last-child .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+#tbl-sanpham-combobox tbody td:last-child .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+}
+
+#tbl-sanpham-combobox tbody td:last-child .btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+#tbl-sanpham-combobox tbody td:last-child .btn-info:hover {
+    background-color: #138496;
+    border-color: #138496;
 }

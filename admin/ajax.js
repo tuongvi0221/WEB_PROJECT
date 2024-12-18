@@ -1,3 +1,4 @@
+
 function them_sp(){
 	var q = 'them_sp',
 	tensp = $('#tensp').val(),
@@ -84,8 +85,7 @@ function xoa_dm(madm_xoa){
 //sap xep cac giao dich
 function list_chuagh(){
 	var q = 'giaodich_chuagh';
-	$('#loadmorebtngd').attr('onclick','load_more_gd(0,`gd_chuagd_body`,`chuagd`)');
-	$('#loai_gd').text("chưa giao hàng");
+	$('#loai_gd').text("chưa hoàn tất");
 	$.ajax({
 		url : "for-ajax.php",
 		type : "post",
@@ -100,8 +100,7 @@ function list_chuagh(){
 }
 function list_dagh(){
 	var q = 'giaodich_dagh';
-	$('#loadmorebtngd').attr('onclick','load_more_gd(0,`gd_dagd_body`,`dagd`)');
-	$('#loai_gd').text("đã giao hàng");
+	$('#loai_gd').text("đã hoàn tất");
 	$.ajax({
 		url : "for-ajax.php",
 		type : "post",
@@ -114,35 +113,22 @@ function list_dagh(){
 		}
 	});
 }
-function list_tatcagh(){
-	var q = 'giaodich_tatcagh';
-	$('#loadmorebtngd').attr('onclick','load_more_gd(0,`gd_tatcagd_body`,`tatcagd`)');
-	$('#loai_gd').text("tất cả");
-	$.ajax({
-		url : "for-ajax.php",
-		type : "post",
-		dataType:"text",
-		data : {
-			q
-		},
-		success : function (result){
-			$('#tbl-giaodich-list').html(result);
-		}
-	});
+function list_tatcagh() {
+    var q = 'giaodich_tatcagh';
+    $('#loai_gd').text("Tất cả");
+    $.ajax({
+        url: "for-ajax.php",
+        type: "POST",
+        dataType: "text",
+        data: {
+            q: q // Thêm dấu `:` để truyền tham số q đúng cách
+        },
+        success: function(result) {
+            $('#tbl-giaodich-list').html(result); // Cập nhật bảng
+        }
+    });
 }
-//giao dich da xong
-function xong(magd_xong){
-	var q = 'giaodich_xong';
-	var x = $(this).closest('tr').children("td:nth-child(4)").text();
-	$.ajax({
-		url : "for-ajax.php",
-		type : "post",
-		dataType:"text",
-		data : {
-			q, magd_xong
-		},
-	});
-}
+
 
 // Lưu tab đang active vào localStorage khi người dùng click vào tab
 $('#admin-tabs a').on('click', function (e) {
@@ -233,11 +219,25 @@ function xoa_taikhoan(id_tk_xoa){
 	});
 }
 function display_edit_sanpham(masp_sua_sp){
-	$('#sua_sp-area').show(300);
-	$('#edit_sp_btn').attr("onclick","sua_sp('"+masp_sua_sp+"')");
-/*	$('#tbl-sanpham-list').toggle(300);
-	$('#loadmorebtn').toggle();*/
+    // Hiển thị phần sửa sản phẩm
+    $('#sua_sp-area').show(300);
+
+    // Cập nhật sự kiện click cho nút "Xong"
+    $('#edit_sp_btn').attr("onclick", "sua_sp('" + masp_sua_sp + "')");
+
+    // Cuộn trang đến phần sửa sản phẩm
+    $('html, body').animate({
+        scrollTop: $('#sua_sp-area').offset().top - 20 // Cuộn lên một chút để đảm bảo không bị ẩn
+    }, 300); // 300ms cho hiệu ứng cuộn trang
 }
+
+// Đảm bảo khi trang đã tải xong thì gọi jQuery
+$(document).ready(function() {
+    // Bạn có thể kiểm tra bằng cách in ra console để xác minh
+    console.log('Document is ready');
+});
+
+
 function sua_sp(masp_sua){
 	var q = 'sua_sp';
 	var tensp_ed = $('#tensp-edit').val();

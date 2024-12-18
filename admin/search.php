@@ -9,6 +9,7 @@ if (isset($_GET['textSearch'])) {
     $textSearch = htmlspecialchars($_GET['textSearch']); // Xử lý dữ liệu đầu vào
     $textSearch = mysqli_real_escape_string($conn, $textSearch);
 
+    // Truy vấn tìm kiếm sản phẩm
     $sql = "SELECT * FROM sanpham sp
             JOIN danhmucsp dm ON sp.madm = dm.madm
             WHERE sp.tensp LIKE '%$textSearch%'";
@@ -18,23 +19,26 @@ if (isset($_GET['textSearch'])) {
 
     // Kiểm tra kết quả và trả về dữ liệu
     if (mysqli_num_rows($result) > 0) {
+        // Hiển thị sản phẩm
         while ($row = mysqli_fetch_assoc($result)) {
             echo "<tr>
                     <td>" . htmlspecialchars($row['tensp']) . "</td>
                     <td>" . number_format($row['gia'], 0, ',', '.') . " VNĐ</td>
                     <td><img src='../" . htmlspecialchars($row['anhchinh']) . "' alt='" . htmlspecialchars($row['tensp']) . "' style='width: 100px; height: auto;'></td>
                     <td>
-                       <span><a class='btn btn-warning' href='#sua_sp-area' onclick=\"display_edit_sanpham('" . $row['masp'] . "')\">Sửa</a></span>
-                       <span class='btn btn-danger' onclick=\"xoa_sp('" . $row['masp'] . "')\">Xóa</span>
+                        <span><a class='btn btn-warning' href='sua_sanpham.php?masp=" . $row['masp'] . "'>Sửa</a></span>
+                        <span class='btn btn-danger' onclick=\"xoa_sp('" . $row['masp'] . "')\">Xóa</span>
                     </td>
                   </tr>";
         }
     } else {
+        // Nếu không tìm thấy sản phẩm
         echo "<tr>
                 <td colspan='4' class='text-center'>Không tìm thấy sản phẩm phù hợp</td>
               </tr>";
     }
 } else {
+    // Nếu không có tham số tìm kiếm
     echo "<tr>
             <td colspan='4' class='text-center'>Vui lòng nhập từ khóa tìm kiếm</td>
           </tr>";

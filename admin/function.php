@@ -73,7 +73,7 @@ function member_list(){
 function exchange_list(){
 	$conn = connect();
 	mysqli_set_charset($conn, 'utf8');
-	$sql = "SELECT * FROM giaodich WHERE tinhtrang = 0 LIMIT ".$_SESSION['limit']."";
+	$sql = "SELECT * FROM giaodich WHERE tinhtrang = 0";
 	$i = 1;
 	$result = mysqli_query($conn, $sql); ?>
 
@@ -87,7 +87,6 @@ function exchange_list(){
         <th>Số DT</th>
         <th>Tổng tiền</th>
         <th>Ngày</th>
-        <th>isDone</th>
     </tr>
 </thead>
 <tbody id="body-gd-list">
@@ -97,7 +96,7 @@ function exchange_list(){
 
     <tr>
         <td><?php echo $i++ ?></td>
-        <td><?php if($row['tinhtrang']) echo "<h4 class='label label-success'>Đã giao hàng</h4>"; else echo "<h4 class='label label-danger'>Chưa giao hàng</h4>";  ?>
+        <td><?php if($row['tinhtrang']) echo "<h4 class='label label-success'>Đã hoàn tất</h4>"; else echo "<h4 class='label label-danger'>Chưa hoàn tất</h4>";  ?>
         </td>
         <td><?php echo $row['user_name'] ?></td>
         <td><?php echo $row['user_dst'] ?></td>
@@ -105,17 +104,9 @@ function exchange_list(){
         <td><?php echo $row['user_phone'] ?></td>
         <td><?php echo $row['tongtien'] ?></td>
         <td><?php echo $row['date'] ?></td>
-        <td>
-            <?php if($row['tinhtrang'] == '0'){ ?>
-            <span class="btn btn-success" onclick="xong('<?php echo $row['magd'] ?>')">Xong</span>
-            <?php } ?>
-        </td>
     </tr>
 
     <?php }	?>
-    <div class="container-fluid text-center lmbtnctn">
-        <button onclick="load_more_gd(0, 'body-gd-list','chuagd')" id="loadmorebtngd">Load more</button>
-    </div>
 </tbody>
 
 <?php
@@ -157,11 +148,12 @@ function type_list(){
 }
 //Danh sach san pham
 function product_list(){
-	$conn = connect();
-	mysqli_set_charset($conn, 'utf8');
-	$sql = "SELECT * FROM sanpham s, danhmucsp d WHERE s.madm = d.madm ORDER BY ngay_nhap DESC LIMIT ".$_SESSION['limit']."";
-	$i = 1;
-	$result = mysqli_query($conn, $sql); ?>
+    $conn = connect();
+    mysqli_set_charset($conn, 'utf8');
+    $sql = "SELECT * FROM sanpham s, danhmucsp d WHERE s.madm = d.madm ORDER BY ngay_nhap DESC";
+    $i = 1;
+    $result = mysqli_query($conn, $sql); ?>
+
 <thead>
     <tr>
         <th>STT</th>
@@ -174,35 +166,37 @@ function product_list(){
         <th>Loại</th>
         <th>Ảnh</th>
         <th>Ngày nhập</th>
-        <th></th>
-        <th></th>
+        <th>Hành động</th>
     </tr>
 </thead>
-<tbody id='body-sp-list'>
 
-    <?php while ($row = mysqli_fetch_assoc($result)){?>
-
-
+<tbody id="body-sp-list">
+    <?php while ($row = mysqli_fetch_assoc($result)) { ?>
     <tr>
         <td><?php echo $i++ ?></td>
-        <td><?php echo $row['tensp'] ?></td>
-        <td><?php echo $row['gia'] ?></td>
-        <td><?php echo $row['chatlieu'] ?></td>
-        <td><?php echo $row['mau'] ?></td>
-        <td><?php echo $row['danhcho'] ?></td>
-        <td><?php echo $row['khuyenmai'] ?></td>
-        <td><?php echo $row['tendm'] ?></td>
-        <td><img src="../<?php echo $row['anhchinh'] ?>"></td>
-        <td><?php echo $row['ngay_nhap'] ?></td>
-        <td><span onclick="display_edit_sanpham('<?php echo $row['masp'] ?>')"><a class="btn btn-warning"
-                    href="#sua_sp-area">Sửa</a></span></td>
-        <td><span class="btn btn-danger" onclick="xoa_sp('<?php echo $row['masp'] ?>')">Xóa</span></td>
-    </tr>
+        <td><?php echo htmlspecialchars($row['tensp']) ?></td>
+        <td><?php echo number_format($row['gia'], 0, ',', '.') ?> VND</td>
+        <td><?php echo htmlspecialchars($row['chatlieu']) ?></td>
+        <td><?php echo htmlspecialchars($row['mau']) ?></td>
+        <td><?php echo htmlspecialchars($row['danhcho']) ?></td>
+        <td><?php echo htmlspecialchars($row['khuyenmai']) ?></td>
+        <td><?php echo htmlspecialchars($row['tendm']) ?></td>
+        <td><img src="../<?php echo htmlspecialchars($row['anhchinh']) ?>" style="width: 100px; height: auto;"></td>
+        <td><?php echo htmlspecialchars($row['ngay_nhap']) ?></td>
+        <td>
+            <span><a class='btn btn-warning' href='sua_sanpham.php?masp=<?php echo $row['masp']; ?>'>Sửa</a></span>
 
-    <?php }	?>
+            <span class="btn btn-danger" onclick="xoa_sp('<?php echo $row['masp'] ?>')">Xóa</span>
+        </td>
+
+    </tr>
+    <?php } ?>
 </tbody>
+
 <?php
 }
+
+
 
 //in ra cac loai sp
 function list_type_pr_for_add(){

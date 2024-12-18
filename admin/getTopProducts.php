@@ -19,7 +19,7 @@ $sql = "SELECT
             sanpham.tensp
         ORDER BY 
             tong_so_luong_ban DESC
-        LIMIT 5";
+        LIMIT 10";
 
 $result = $conn->query($sql);
 

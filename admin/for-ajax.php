@@ -21,9 +21,7 @@ if(isset($_GET['fname'])){
 if($fname == "load_more"){
 	load_more();
 }
-if($fname == "load_more_gd"){
-	load_more_gd();
-}
+
 function load_more(){
 	session_start();
 	$cr = '';
@@ -50,73 +48,14 @@ function load_more(){
     <td><?php echo $row['tendm'] ?></td>
     <td><img src="../<?php echo $row['anhchinh'] ?>"></td>
     <td><?php echo $row['ngay_nhap'] ?></td>
-    <td><span onclick="display_edit_sanpham('<?php echo $row['masp'] ?>')"><a class="btn btn-warning"
-                href="#sua_sp-area">Sửa</a></span></td>
+    <td> <span><a class='btn btn-warning' href='sua_sanpham.php?masp=$masp'>Sửa</a></span>
     <td><span class="btn btn-danger" onclick="xoa_sp('<?php echo $row['masp'] ?>')">Xóa</span></td>
 </tr>
 
 <?php
 	}
 }
-function load_more_gd(){
-	session_start();
-	$cr = $stt = '';
-	if(isset($_GET['current'])){$cr = $_GET['current'];}
-	if(isset($_GET['stt'])){$stt = $_GET['stt'];}
-	$st = ($cr+1)*$_SESSION['limit'];
-	
-	if($stt == "dagd"){
-		if($st > $_SESSION['gd_dagd'] + 1){
-			echo "Đã hết mục để hiển thị";
-			return;
-		}
-		$sql = "SELECT * FROM giaodich WHERE tinhtrang = 1 LIMIT ".$st.",".$_SESSION['limit']."";
-	} elseif ($stt == "chuagd") {
-		if($st > $_SESSION['gd_chua'] + 1){
-			echo "Đã hết mục để hiển thị";
-			return;
-		}
-		$sql = "SELECT * FROM giaodich WHERE tinhtrang = 0 LIMIT ".$st.",".$_SESSION['limit']."";
-	} else {
-		if($st > $_SESSION['gd_all'] + 1){
-			echo "Đã hết mục để hiển thị";
-			return;
-		}
-		$sql = "SELECT * FROM giaodich LIMIT ".$st.",".$_SESSION['limit']."";
-	}
-	$conn = mysqli_connect('localhost','root','280704','qlbh') or die('Không thể kết nối!');
-	mysqli_set_charset($conn, 'utf8');
-	$result = mysqli_query($conn, $sql);
-	$i = $st;
-	while ($row = mysqli_fetch_assoc($result)){
-		?>
-<tr>
-    <td><?php echo ++$i ?></td>
-    <td>
-        <?php 
-				if($row['tinhtrang'] == 0){
-					echo "<h4 class='label label-danger'>Chưa giao hàng</h4>";
-				} else {
-					echo "<h4 class='label label-success'>Đã giao hàng</h4>";
-				} 
-				?>
-    </td>
-    <td><?php echo $row['user_name'] ?></td>
-    <td><?php echo $row['user_dst'] ?></td>
-    <td><?php echo $row['user_addr'] ?></td>
-    <td><?php echo $row['user_phone'] ?></td>
-    <td><?php echo $row['tongtien'] ?></td>
-    <td><?php echo $row['date'] ?></td>
-    <td>
-        <?php if($row['tinhtrang'] == '0'){ ?>
-        <span class="btn btn-success" onclick="xong('<?php echo $row['magd'] ?>')">Xong</span>
-        <?php } ?>
-    </td>
-</tr>
 
-<?php
-	}
-}
 
 switch ($q) {
 	case 'xoa_sp':
@@ -136,9 +75,6 @@ switch ($q) {
 	break;
 	case 'giaodich_tatcagh':
 	giaodich_tatcagh();
-	break;
-	case 'giaodich_xong':
-	giaodich_xong();
 	break;
 	case 'them_admin':
 	them_admin();
@@ -209,7 +145,7 @@ session_start();
 $conn = connect();
 mysqli_set_charset($conn, 'utf8');
 echo $_SESSION['limit'];
-$sql = "SELECT * FROM giaodich WHERE tinhtrang = 0 LIMIT ".$_SESSION['limit'];
+$sql = "SELECT * FROM giaodich WHERE tinhtrang = 0";
 $i = 1;
 $result = mysqli_query($conn, $sql); ?>
 
@@ -223,7 +159,7 @@ $result = mysqli_query($conn, $sql); ?>
         <th>Số DT</th>
         <th>Tổng tiền</th>
         <th>Ngày</th>
-        <th>isDone</th>
+
     </tr>
 </thead>
 <tbody id="gd_chuagd_body">
@@ -233,7 +169,7 @@ $result = mysqli_query($conn, $sql); ?>
 
     <tr>
         <td><?php echo $i++ ?></td>
-        <td><?php if($row['tinhtrang']) echo "<h4 class='label label-success'>Đã giao hàng</h4>"; else echo "<h4 class='label label-danger'>Chưa giao hàng</h4>";  ?>
+        <td><?php if($row['tinhtrang']) echo "<h4 class='label label-success'>Đã hoàn tất</h4>"; else echo "<h4 class='label label-danger'>Chưa hoàn tất</h4>";  ?>
         </td>
         <td><?php echo $row['user_name'] ?></td>
         <td><?php echo $row['user_dst'] ?></td>
@@ -241,7 +177,7 @@ $result = mysqli_query($conn, $sql); ?>
         <td><?php echo $row['user_phone'] ?></td>
         <td><?php echo $row['tongtien'] ?></td>
         <td><?php echo $row['date'] ?></td>
-        <td><span class="btn btn-success" onclick="xong('<?php echo $row['magd'] ?>')">Xong</span></td>
+
     </tr>
 
     <?php }	?>
@@ -254,7 +190,7 @@ function giaodich_dagh(){
 	session_start();
 	$conn = connect();
 	mysqli_set_charset($conn, 'utf8');
-	$sql = "SELECT * FROM giaodich WHERE tinhtrang = 1 LIMIT ".$_SESSION['limit'];
+	$sql = "SELECT * FROM giaodich WHERE tinhtrang = 1";
 	$i = 1;
 	$result = mysqli_query($conn, $sql); ?>
 
@@ -268,7 +204,7 @@ function giaodich_dagh(){
         <th>Số DT</th>
         <th>Tổng tiền</th>
         <th>Ngày</th>
-        <th>isDone</th>
+
     </tr>
 </thead>
 <tbody id="gd_dagd_body">
@@ -278,7 +214,7 @@ function giaodich_dagh(){
 
     <tr>
         <td><?php echo $i++ ?></td>
-        <td><?php if($row['tinhtrang']) echo "<h4 class='label label-success'>Đã giao hàng</h4>"; else echo "<h4 class='label label-danger'>Chưa giao hàng</h4>";  ?>
+        <td><?php if($row['tinhtrang']) echo "<h4 class='label label-success'>Đã hoàn tất</h4>"; else echo "<h4 class='label label-danger'>Chưa hoàn tất</h4>";  ?>
         </td>
         <td><?php echo $row['user_name'] ?></td>
         <td><?php echo $row['user_dst'] ?></td>
@@ -299,7 +235,7 @@ function giaodich_tatcagh(){
 	session_start();
 	$conn = connect();
 	mysqli_set_charset($conn, 'utf8');
-	$sql = "SELECT * FROM giaodich LIMIT ".$_SESSION['limit'];
+	$sql = "SELECT * FROM giaodich";
 	$i = 1;
 	$result = mysqli_query($conn, $sql); ?>
 
@@ -313,7 +249,6 @@ function giaodich_tatcagh(){
         <th>Số DT</th>
         <th>Tổng tiền</th>
         <th>Ngày</th>
-        <th>isDone</th>
     </tr>
 </thead>
 <tbody id="gd_tatcagd_body">
@@ -323,7 +258,7 @@ function giaodich_tatcagh(){
 
     <tr>
         <td><?php echo $i++ ?></td>
-        <td><?php if($row['tinhtrang']) echo "<h4 class='label label-success'>Đã giao hàng</h4>"; else echo "<h4 class='label label-danger'>Chưa giao hàng</h4>";  ?>
+        <td><?php if($row['tinhtrang']) echo "<h4 class='label label-success'>Đã hoàn tất</h4>"; else echo "<h4 class='label label-danger'>Chưa hoàn tất</h4>";  ?>
         </td>
         <td><?php echo $row['user_name'] ?></td>
         <td><?php echo $row['user_dst'] ?></td>
@@ -331,27 +266,13 @@ function giaodich_tatcagh(){
         <td><?php echo $row['user_phone'] ?></td>
         <td><?php echo $row['tongtien'] ?></td>
         <td><?php echo $row['date'] ?></td>
-        <td>
-            <?php if($row['tinhtrang'] == '0'){ ?>
-            <span class="btn btn-success" onclick="xong('<?php echo $row['magd'] ?>')">Xong</span>
-            <?php } ?>
-        </td>
+
     </tr>
 
     <?php }	?>
 </tbody>
 
 <?php
-	disconnect($conn);
-}
-function giaodich_xong(){
-	$magd = $_POST['magd_xong'];
-	$conn = connect();
-	mysqli_set_charset($conn, 'utf8');
-	$sql = "UPDATE giaodich SET tinhtrang = '1' WHERE magd = '".$magd."'";
-	if(!mysqli_query($conn, $sql)){
-		echo "Đã xảy ra lỗi!";
-	}
 	disconnect($conn);
 }
 
