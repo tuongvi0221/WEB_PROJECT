@@ -8,17 +8,7 @@ if (!$conn) {
 if (isset($_POST['action']) && isset($_POST['magd'])) {
     $magd = $_POST['magd'];
 
-    if ($_POST['action'] == 'da_nhan') {
-        $tinhtrang = 1;
-        $ngaynhan = date('Y-m-d H:i:s');
-
-        $update_query = "UPDATE giaodich SET tinhtrang = '$tinhtrang', ngaynhan = '$ngaynhan' WHERE magd = '$magd'";
-        if (mysqli_query($conn, $update_query)) {
-            echo "Cập nhật thành công!";
-        } else {
-            echo "Lỗi cập nhật: " . mysqli_error($conn);
-        }
-    } elseif ($_POST['action'] == 'chi_tiet') {
+    if ($_POST['action'] == 'chi_tiet') {
         $detail_query = "
             SELECT 
                 gv.ten AS ten_khach_hang, gv.diachi, gv.sodt, gv.email, gd.date AS ngay_dat, gd.magd, 

@@ -1,5 +1,3 @@
-ajax_calling.php
-
 <?php
 
 require_once 'backend-index.php';
@@ -99,9 +97,6 @@ function load_more() {
 
     mysqli_close($conn); // Đóng kết nối
 }
-
-
-
 
 function php_saling() {
     session_start();
