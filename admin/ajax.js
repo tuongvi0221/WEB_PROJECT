@@ -143,6 +143,37 @@ function xong(magd_xong){
 		},
 	});
 }
+
+// Lưu tab đang active vào localStorage khi người dùng click vào tab
+$('#admin-tabs a').on('click', function (e) {
+    e.preventDefault();
+    const activeTab = $(this).attr('href'); // Lấy id của tab hiện tại
+    localStorage.setItem('activeTab', activeTab); // Lưu vào localStorage
+    $(this).tab('show'); // Hiển thị tab
+});
+
+// Khôi phục tab khi load lại trang
+$(document).ready(function () {
+    const activeTab = localStorage.getItem('activeTab'); // Lấy tab từ localStorage
+    if (activeTab) {
+        $('#admin-tabs a[href="' + activeTab + '"]').tab('show'); // Kích hoạt tab
+    }
+});
+
+$('#add-admin-form').submit(function (e) {
+    e.preventDefault();
+    const formData = $(this).serialize(); // Dữ liệu form
+
+    $.post('add-admin.php', formData, function (response) {
+        alert('Thêm thành viên thành công');
+        $('#add-admin-area').hide(); // Ẩn form thêm admin
+        $('#admin-list').load('load-admin.php'); // Load lại danh sách thành viên
+        $('#admin-tabs a[href="#thanhvien"]').tab('show'); // Kích hoạt tab thành viên
+    });
+});
+
+
+// Cập nhật thành viên xong thì giữ nguyên tab
 function them_admin() {
     var q = 'them_admin';
     var ten = $('#admin-name').val();
@@ -151,6 +182,13 @@ function them_admin() {
     var address = $('#admin-address').val();
     var phone = $('#admin-phonenumber').val();
     var email = $('#admin-email').val();
+
+    var phonePattern = /^[0-9]{10}$/; // Kiểm tra số điện thoại có đúng định dạng
+    if (!phonePattern.test(phone)) {
+        alert("Số điện thoại phải gồm 10 chữ số.");
+        return;
+    }
+
     $.ajax({
         url: "for-ajax.php",
         type: "post",
@@ -158,15 +196,26 @@ function them_admin() {
         data: {
             q, ten, tentk, mk, diachi: address, sdt: phone, email: email
         },
-        success: function(result) {
-            $('#tbl-thanhvien-list').html(result);
-            location.reload();
-        },
-        error: function() {
-            alert("Có lỗi xảy ra khi thêm admin!");
+        success: function (result) {
+			// Thông báo thành công
+			alert("Thêm thành viên thành công!");
+		
+			// Làm mới nội dung danh sách thành viên
+			$('#tbl-thanhvien-list').html(result);
+		
+			// Giữ nguyên tab thành viên đang active
+			$('a[href="#tab-thanhvien"]').tab('show');
+		},
+		
+        error: function () {
+            alert("Có lỗi xảy ra khi thêm thành viên!");
         }
     });
 }
+
+
+
+
 
 function xoa_taikhoan(id_tk_xoa){
 	var q = 'xoa_taikhoan';

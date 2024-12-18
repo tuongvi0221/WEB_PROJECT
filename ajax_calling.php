@@ -1,3 +1,5 @@
+ajax_calling.php
+
 <?php
 
 require_once 'backend-index.php';
@@ -35,8 +37,6 @@ switch ($fname) {
 	case 'load_more':
 	load_more();
 	break;
-
-		
 }
 function load_more() {
     session_start();
@@ -589,8 +589,10 @@ function php_giohang()
                     <form id="cart-form" method="POST" action="order.php?q=multi">
                         <?php while ($row = mysqli_fetch_assoc($result)) { ?>
                         <div class="d-flex align-items-center border-bottom py-3">
+                            <!-- Checkbox để chọn sản phẩm -->
                             <input type="checkbox" name="selected_products[]" value="<?php echo $row['masp']; ?>"
                                 class="me-3">
+
                             <img src="<?php echo $row['anhchinh']; ?>" class="rounded" alt="Sản phẩm"
                                 style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px;">
                             <div class="flex-grow-1">
@@ -610,6 +612,7 @@ function php_giohang()
                             <button type="submit" class="btn btn-success btn-lg px-5">Đặt Hàng</button>
                         </div>
                     </form>
+
                     <?php
                         ?>
                 </div>

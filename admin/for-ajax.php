@@ -366,14 +366,42 @@ function them_admin() {
     $sdt = isset($_POST['sdt']) ? mysqli_real_escape_string($conn, $_POST['sdt']) : null;
     $email = isset($_POST['email']) ? mysqli_real_escape_string($conn, $_POST['email']) : null;
 
-    // Gán ngày tạo bằng ngày hiện tại
-    $ngaytao = date('Y-m-d H:i:s'); // Định dạng: Năm-Tháng-Ngày Giờ:Phút:Giây
-
     // Kiểm tra nếu các trường bắt buộc bị bỏ trống
     if (!$ten || !$tentk || !$mk) {
         echo "Tên, tên tài khoản và mật khẩu là bắt buộc!";
         exit;
     }
+
+    // Kiểm tra số điện thoại đúng định dạng (10 chữ số)
+    if (!preg_match("/^\d{10}$/", $sdt)) {
+        echo "Số điện thoại phải gồm 10 chữ số.";
+        exit;
+    }
+
+    // Kiểm tra email có hợp lệ không
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "Địa chỉ email không hợp lệ.";
+        exit;
+    }
+
+    // Kiểm tra số điện thoại đã tồn tại trong cơ sở dữ liệu
+    $sql_check_sdt = "SELECT * FROM thanhvien WHERE sodt = '$sdt'";
+    $result_sdt = mysqli_query($conn, $sql_check_sdt);
+    if (mysqli_num_rows($result_sdt) > 0) {
+        echo "Số điện thoại đã tồn tại trong hệ thống.";
+        exit;
+    }
+
+    // Kiểm tra email đã tồn tại trong cơ sở dữ liệu
+    $sql_check_email = "SELECT * FROM thanhvien WHERE email = '$email'";
+    $result_email = mysqli_query($conn, $sql_check_email);
+    if (mysqli_num_rows($result_email) > 0) {
+        echo "Email đã tồn tại trong hệ thống.";
+        exit;
+    }
+
+    // Gán ngày tạo bằng ngày hiện tại
+    $ngaytao = date('Y-m-d H:i:s'); // Định dạng: Năm-Tháng-Ngày Giờ:Phút:Giây
 
     // Tạo câu lệnh SQL
     $sql = "INSERT INTO thanhvien (ten, tentaikhoan, matkhau, diachi, sodt, email, ngaytao, quyen) 

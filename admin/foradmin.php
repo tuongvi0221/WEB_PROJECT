@@ -144,23 +144,25 @@ $_SESSION['gd_chua'] = mysqli_num_rows($result);
 </head>
 
 <body>
+    <!-- Thêm vào phần trên của trang HTML -->
+
     <div class="container-fluid">
         <h2>Clothes - Trang quản trị dành cho admin</h2>
         <h3 id="big-error"></h3>
         <div role="tabpanel">
             <!-- Nav tabs -->
-            <ul class="nav nav-tabs" role="tablist">
+            <ul class="nav nav-tabs" role="tablist" id="admin-tabs">
                 <li role="presentation" class="active">
-                    <a href="#sanpham" aria-controls="home" role="tab" data-toggle="tab">Sản phẩm</a>
+                    <a href="#sanpham" aria-controls="sanpham" role="tab" data-toggle="tab">Sản phẩm</a>
                 </li>
                 <li role="presentation">
-                    <a href="#thanhvien" aria-controls="tab" role="tab" data-toggle="tab">Thành viên</a>
+                    <a href="#thanhvien" aria-controls="thanhvien" role="tab" data-toggle="tab">Thành viên</a>
                 </li>
                 <li role="presentation">
-                    <a href="#giaodich" aria-controls="tab" role="tab" data-toggle="tab">Giao dịch</a>
+                    <a href="#giaodich" aria-controls="giaodich" role="tab" data-toggle="tab">Giao dịch</a>
                 </li>
                 <li role="presentation">
-                    <a href="#danhmuc" aria-controls="tab" role="tab" data-toggle="tab">Danh mục</a>
+                    <a href="#danhmuc" aria-controls="danhmuc" role="tab" data-toggle="tab">Danh mục</a>
                 </li>
             </ul>
 

@@ -1,9 +1,12 @@
+giaodich.php
+
 <?php 
 
 session_start();
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
 
 require 'vendor/PHPMailer/src/PHPMailer.php';
 require 'vendor/PHPMailer/src/SMTP.php';
@@ -13,29 +16,30 @@ require_once 'layout/second_header.php';
 
 $ten = $quan = $dc = $sodt = $money = $sl = 0; // Khởi tạo biến với giá trị 0
 if(isset($_POST['ten'])){
-    $ten = $_POST['ten'];
+	$ten = $_POST['ten'];
 }
 if(isset($_POST['quan'])){
-    $quan = $_POST['quan'];
+	$quan = $_POST['quan'];
 }
 if(isset($_POST['dc'])){
-    $dc = $_POST['dc'];
+	$dc = $_POST['dc'];
 }
 if(isset($_POST['sodt'])){
-    $sodt = $_POST['sodt'];
+	$sodt = $_POST['sodt'];
 }
 if(isset($_POST['sl'])){
-    $sl = $_POST['sl'];
+	$sl = $_POST['sl'];
 }
 
 if(isset($_POST['email'])){
-    $email = $_POST['email'];
+	$email = $_POST['email'];
 }
 
+
 if($ten == "" || $quan == "" || $dc == "" || $sodt == "" || $email == ""){
-    echo "Không được để trống bất kỳ ô nào!";
-    require_once 'layout/second_footer.php';
-    return 0;
+	echo "Không được để trống bất kỳ ô nào!";
+	require_once 'layout/second_footer.php';
+	return 0;
 }
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
@@ -43,23 +47,23 @@ $now = date("Y-m-d h:i:s");
 $conn = connect();
 mysqli_set_charset($conn, 'utf8');
 
-for($i = 0; $i < count($sl); $i++){
-    if($sl[$i] < 0){
-        echo "<h3 style='color: red; padding: 30px;'>Số lượng tối thiểu phải bằng 0</h3>";
-        require_once 'layout/second_footer.php';
-        return 0;
-    }
-    $x = str_replace(' ', '', $_SESSION['cost'][$i]);
-    $x = floatval($x); // Chuyển đổi chuỗi sang số thực
-    $money += $sl[$i] * $x; // Bây giờ $money sẽ cộng được
+for ($i = 0; $i < count($sl); $i++) {
+	if (!isset($sl[$i]) || $sl[$i] < 0) {
+			echo "<h3 style='color: red; padding: 30px;'>Số lượng tối thiểu phải là 0 và chỉ mục phải tồn tại.</h3>";
+			require_once 'layout/second_footer.php';
+			return 0;
+	}
+	$x = str_replace(' ', '', $_SESSION['cost'][$i]);
+	$x = floatval($x);
+	$money += $sl[$i] * $x;
 }
+
 
 if($money == 0){
-    echo "<h3 style='color: red; padding: 30px;'>Không có sản phẩm nào được đặt!</h3>";
-    require_once 'layout/second_footer.php';
-    return 0;
+	echo "<h3 style='color: red; padding: 30px;'>Không có sản phẩm nào được đặt!</h3>";
+	require_once 'layout/second_footer.php';
+	return 0;
 }
-
 ?>
 
 <div class="row">
@@ -77,64 +81,75 @@ if($money == 0){
 <?php
 $userId = "";
 if($_SESSION['rights'] == "user"){
-    if ($_SESSION['rights'] == 'user') {
-        // Lấy email từ cơ sở dữ liệu
-        $userId = $_SESSION['user']['id'];
-        $query = "SELECT email FROM thanhvien WHERE id = '$userId'";
-        $result = mysqli_query($conn, $query);
-        $row = mysqli_fetch_assoc($result);
-        $email = $row['email'];
-    } else {
-        // Lấy email từ form
-        $email = $_POST['email'];
-    }
-    
-    // Khởi tạo đối tượng PHPMailer
-    $mail = new PHPMailer(true);
-    
-    try {
-        // Cấu hình server SMTP của Gmail
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com'; // Server SMTP của Gmail
-        $mail->SMTPAuth = true;
-        $mail->Username = 'huuthien180204@gmail.com'; // Địa chỉ email của shop
-        $mail->Password = 'ejsnaiikwgbgjacr'; // Mật khẩu ứng dụng hoặc mật khẩu của email
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587; // Port cho STARTTLS là 587
-        $mail->CharSet = 'UTF-8';
-    
-        // Thông tin người gửi và người nhận
-        $mail->setFrom('huuthien180204@gmail.com', 'Fashion Katy'); // Địa chỉ và tên người gửi
-        $mail->addAddress($email, $ten); // Địa chỉ và tên người nhận
-    
-        // Tạo nội dung chi tiết đơn hàng
-        $orderDetails = "<ul>";
-        for ($i = 0; $i < count($sl); $i++) {
-            $productName = $_SESSION['product_names'][$i]; // Lấy tên sản phẩm từ session
-            $quantity = $sl[$i];
-            $price = number_format($_SESSION['cost'][$i], 0, ",", ".") . " VND";
-            $totalPrice = number_format($quantity * $_SESSION['cost'][$i], 0, ",", ".") . " VND";
-            $orderDetails .= "<li> Sản phẩm: $productName, Số lượng: $quantity, Đơn giá: $price, Thành tiền: $totalPrice </li>";
-        }
-        $orderDetails .= "<ul>";
+	if ($_SESSION['rights'] == 'user') {
+		// Lấy email từ cơ sở dữ liệu
+		$userId = $_SESSION['user']['id'];
+		$query = "SELECT email FROM thanhvien WHERE id = '$userId'";
+		$result = mysqli_query($conn, $query);
+		$row = mysqli_fetch_assoc($result);
+		$email = $row['email'];
+	} else {
+		// Lấy email từ form
+		$email = $_POST['email'];
+	}
+	
+	// Khởi tạo đối tượng PHPMailer
+	$mail = new PHPMailer(true);
+	
+	try {
+		// Cấu hình server SMTP của Gmail
+		$mail->isSMTP();
+		$mail->Host = 'smtp.gmail.com'; // Server SMTP của Gmail
+		$mail->SMTPAuth = true;
+		$mail->Username = 'huuthien180204@gmail.com'; // Địa chỉ email của shop
+		$mail->Password = 'ejsnaiikwgbgjacr'; // Mật khẩu ứng dụng hoặc mật khẩu của email
+		$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+		$mail->Port = 587; // Port cho STARTTLS là 587
+		$mail->CharSet = 'UTF-8';
+	
+		// Thông tin người gửi và người nhận
+		$mail->setFrom('huuthien180204@gmail.com', 'Fashion Katy'); // Địa chỉ và tên người gửi
+		$mail->addAddress($email, $ten); // Địa chỉ và tên người nhận
+	
+		// Tạo nội dung chi tiết đơn hàng
+		$orderDetails = "<ul>";
+		for ($i = 0; $i < count($sl); $i++) {
+				$productName = $_SESSION['product_names'][$i]; // Lấy tên sản phẩm từ session
+				$quantity = $sl[$i];
+				$price = number_format($_SESSION['cost'][$i], 0, ",", ".") . " VND";
+				$totalPrice = number_format($quantity * $_SESSION['cost'][$i], 0, ",", ".") . " VND";
+				$orderDetails .= "<li> Sản phẩm: $productName, Số lượng: $quantity, Đơn giá: $price, Thành tiền: $totalPrice </li>";
+		}
+		$orderDetails .= "<ul>";
 
-        // Thiết lập nội dung email mới
-        $mail->isHTML(true);
-        $mail->Subject = "Đơn hàng của bạn đã được đặt thành công";
-        $mail->Body = "<p>Xin chào $ten,</p>
-                                        <p>Cảm ơn bạn đã đặt hàng!</p>
-                                        <p>Chi tiết đơn hàng:</p>
-                                        $orderDetails
-                                        <p><strong>Tổng giá trị đơn hàng: " . number_format($money, 0, ",", ".") . " VND</strong></p>
-                                        <p>Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.</p>
-                                        <p>Trân trọng,<br>Đội ngũ hỗ trợ khách hàng.</p>";
-    
-        // Gửi email
-        $mail->send();
-        echo "Email đã được gửi thành công đến $email.";
-    } catch (Exception $e) {
-        echo "Có lỗi xảy ra khi gửi email. Lỗi: {$mail->ErrorInfo}";
-    }
+		$orderDetails = "<ul>";
+		for ($i = 0; $i < count($sl); $i++) {
+			$productName = $_SESSION['product_names'][$i];
+			$quantity = $sl[$i];
+			$price = number_format($_SESSION['cost'][$i], 0, ",", ".");
+			$totalPrice = number_format($quantity * $_SESSION['cost'][$i], 0, ",", ".");
+			$orderDetails .= "<li>Sản phẩm: $productName, Số lượng: $quantity, Đơn giá: $price, Thành tiền: $totalPrice</li>";
+		}
+		$orderDetails .= "</ul>";
+
+		// Thiết lập nội dung email mới
+		$mail->isHTML(true);
+		$mail->Subject = "Đơn hàng của bạn đã được đặt thành công";
+		$mail->Body = "<p>Xin chào $ten,</p>
+									 <p>Cảm ơn bạn đã đặt hàng!</p>
+									 <p>Chi tiết đơn hàng:</p>
+									 $orderDetails
+									 <p><strong>Tổng giá trị đơn hàng: " . number_format($money, 0, ",", ".") . " VND</strong></p>
+									 <p>Chúng tôi sẽ liên hệ với bạn sớm nhất có thể.</p>
+									 <p>Trân trọng,<br>Đội ngũ hỗ trợ khách hàng.</p>";
+	
+		// Gửi email
+		$mail->send();
+		echo "Email đã được gửi thành công đến $email.";
+	} catch (Exception $e) {
+		echo "Có lỗi xảy ra khi gửi email. Lỗi: {$mail->ErrorInfo}";
+	}
+	
 }
 
 $sql = "INSERT INTO giaodich (user_id, user_name, user_dst, user_addr, user_phone, tongtien, date) 
@@ -153,18 +168,22 @@ if (!$last_magd) {
     return;
 }
 
+
 $sql_multi = [];
 if (isset($_SESSION['buynow'])) {
-    $sql_multi[] = "('{$last_magd}', '{$_SESSION['buynow']}', '{$sl[0]}')";
+    if ($sl[0] > 0) { // Chỉ thêm sản phẩm nếu số lượng lớn hơn 0
+        $sql_multi[] = "('{$last_magd}', '{$_SESSION['buynow']}', '{$sl[0]}')";
+    }
 } else {
     $cart = ($_SESSION['rights'] === "user") ? $_SESSION['user_cart'] : $_SESSION['client_cart'];
-    array_shift($cart); 
+    array_shift($cart); // Bỏ phần tử đầu tiên nếu cần (trường hợp không liên quan).
     foreach ($cart as $index => $masp) {
-        $sql_multi[] = "('{$last_magd}', '{$masp}', '{$sl[$index]}')";
+        if (isset($sl[$index]) && $sl[$index] > 0) { // Kiểm tra chỉ mục và số lượng hợp lệ
+            $sql_multi[] = "('{$last_magd}', '{$masp}', '{$sl[$index]}')";
+        }
     }
 }
 
-// Chèn chi tiết giao dịch vào bảng chitietgiaodich
 if (!empty($sql_multi)) {
     $sql_query = "INSERT INTO chitietgiaodich (magd, masp, soluong) VALUES " . implode(',', $sql_multi);
     if (!mysqli_query($conn, $sql_query)) {

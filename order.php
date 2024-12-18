@@ -1,22 +1,32 @@
-<?php 
+order.php
+
+<?php
 require_once 'layout/second_header.php';
 require_once 'backend-index.php';
+
 $masp = $q = "";
 $_SESSION['cost'] = array(); // Khởi tạo là một mảng
 
-if(isset($_GET['masp'])){
+if (isset($_POST['selected_products']) && is_array($_POST['selected_products'])) {
+    // Nếu danh sách sản phẩm được gửi qua phương thức POST
+    $selectedProducts = $_POST['selected_products'];
+
+    // Chuyển danh sách sản phẩm thành chuỗi cho câu truy vấn SQL
+    $x = '(' . implode(',', array_map('intval', $selectedProducts)) . ')';
+    $sql = "SELECT * FROM sanpham WHERE masp IN $x";
+} else if (isset($_GET['masp'])) {
     $masp = $_GET['masp'];
     $_SESSION['buynow'] = $masp;
-}
-
-if(isset($_GET['q'])){
+    $sql = "SELECT * FROM sanpham WHERE masp = '".$masp."'";
+} else if (isset($_GET['q'])) {
     $q = $_GET['q'];
-    if($q == 'multi'){
-        if($_SESSION['rights'] == "default"){
-            if(isset($_SESSION['client_cart']) && count($_SESSION['client_cart']) > 0){
+    if ($q == 'multi') {
+        if ($_SESSION['rights'] == "default") {
+            if (isset($_SESSION['client_cart']) && count($_SESSION['client_cart']) > 1) {
                 $tmpArr = $_SESSION['client_cart'];
-                $x = '('.implode(',',$tmpArr).')';
-                $sql = "SELECT * FROM sanpham WHERE masp in ".$x."";
+                array_shift($tmpArr);
+                $x = '(' . implode(',', $tmpArr) . ')';
+                $sql = "SELECT * FROM sanpham WHERE masp in $x";
             } else {
                 echo "<script>alert('Giỏ hàng trống!')</script>";
                 return 0;
@@ -24,14 +34,14 @@ if(isset($_GET['q'])){
         } else {
             $tmpArr = $_SESSION['user_cart'];
             array_shift($tmpArr);
-            $x = '('.implode(',',$tmpArr).')';
-            $sql = "SELECT * FROM sanpham WHERE masp in ".$x."";
+            $x = '(' . implode(',', $tmpArr) . ')';
+            $sql = "SELECT * FROM sanpham WHERE masp in $x";
         }
-    } elseif($q == 'buylikepr'){ // Đã sửa điều kiện từ '=' thành '=='
+    } elseif ($q == 'buylikepr') {
         $tmpArr = $_SESSION['like'];
         array_shift($tmpArr);
-        $x = '('.implode(',',$tmpArr).')';
-        $sql = "SELECT * FROM sanpham WHERE masp in ".$x."";
+        $x = '(' . implode(',', $tmpArr) . ')';
+        $sql = "SELECT * FROM sanpham WHERE masp in $x";
     } else {
         $_SESSION['buynow'] = $masp;
     }
@@ -44,6 +54,7 @@ mysqli_set_charset($conn, 'utf8');
 
 $result = mysqli_query($conn, $sql);
 ?>
+
 <script type="text/javascript">
 window.onload = function() {
     tinh_tien()
@@ -139,16 +150,11 @@ window.onload = function() {
                 <div class="form-group">
                     <label for="">Số điện thoại: </label>
                     <input type="text" class="form-control" name="sodt" id="s_sdt" value="<?php 
-        if($_SESSION['rights'] == 'user'){
-            echo $_SESSION['user']['sodt'];
-        }
-    ?>">
-                    <small id="error_sdt" class="form-text text-danger" style="display:none;">Số điện thoại không hợp
-                        lệ. Vui lòng nhập lại!</small>
+                        if($_SESSION['rights'] == 'user'){
+                            echo $_SESSION['user']['sodt'];
+                        }
+                    ?>">
                 </div>
-
-
-
 
                 <!-- Thêm trường Email -->
                 <div class="form-group">
@@ -168,7 +174,7 @@ window.onload = function() {
                     </select>
                 </div>
 
-                <button id="submitButton" class="btn btn-primary" type="button">Đặt Hàng</button><br><br>
+                <button onclick="check_before_submit()" class="btn btn-primary" type="submit">Đặt Hàng</button><br><br>
             </div>
 
 
@@ -224,35 +230,6 @@ function tinh_tien() {
 window.onload = function() {
     tinh_tien()
 }
-</script>
-
-<script>
-// Hàm kiểm tra số điện thoại
-function validatePhoneNumber() {
-    var phoneNumber = document.getElementById("s_sdt").value;
-    var errorMessage = document.getElementById("error_sdt");
-
-    // Kiểm tra định dạng số điện thoại (bắt đầu với 0 và có 10 chữ số)
-    var phoneRegex = /^(0)[0-9]{9}$/;
-
-    if (phoneRegex.test(phoneNumber)) {
-        errorMessage.style.display = "none"; // Ẩn thông báo lỗi nếu đúng định dạng
-        return true;
-    } else {
-        errorMessage.style.display = "block"; // Hiển thị thông báo lỗi nếu sai định dạng
-        return false;
-    }
-}
-
-// Sự kiện khi nhấn nút Đặt Hàng
-document.getElementById("submitButton").addEventListener("click", function(event) {
-    if (validatePhoneNumber()) {
-        document.querySelector("form").submit(); // Submit form nếu số điện thoại hợp lệ
-    } else {
-        event.preventDefault(); // Ngừng submit nếu số điện thoại không hợp lệ
-        alert("Số điện thoại không hợp lệ. Vui lòng nhập lại!");
-    }
-});
 </script>
 
 <?php require_once 'layout/second_footer.php'; ?>

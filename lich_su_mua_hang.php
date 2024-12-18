@@ -1,164 +1,180 @@
 <?php
 session_start();
-// Access the user session variable
-$user = isset($_SESSION['user']) ? $_SESSION['user'] : null;
+
+// Lấy thông tin user ID từ session
+$userId = isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
+
+// Kiểm tra tính hợp lệ của $userId
+if (!is_string($userId) || empty($userId)) {
+    die("Lỗi: User không hợp lệ.");
+}
+
 // Kết nối cơ sở dữ liệu
 $conn = mysqli_connect('localhost', 'root', '', 'qlbh');
 if (!$conn) {
     die("Kết nối thất bại: " . mysqli_connect_error());
 }
-// Xử lý trạng thái nếu có yêu cầu POST
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $id = intval($_POST['id']);
-    $action = $_POST['action'];
-    if ($action === 'chi_tiet') {
-        header("Location: lich_su_mua_hang_chitiet.php?id=$id");
-    }
-    if ($action === 'da_nhan') {
-        // Cập nhật trạng thái đơn hàng là 'Đã nhận hàng'
-        $sql_update = "UPDATE lich_su_mua_hang SET trang_thai = 'Đã nhận' WHERE id = $id";
-        if (mysqli_query($conn, $sql_update)) {
-            echo "<script>alert('Đã xác nhận nhận hàng thành công!');</script>";
-        } else {
-            echo "<script>alert('Xảy ra lỗi, vui lòng thử lại!!!');</script>";
-        }
-    } elseif ($action === 'tra_hang') {
-        // Kiểm tra ngày dự kiến nhận hàng trước khi cho phép yêu cầu trả hàng
-        $sql_check_date = "SELECT ngay_du_kien_nhan FROM lich_su_mua_hang WHERE id = $id";
-        $result = mysqli_query($conn, $sql_check_date);
-        $row = mysqli_fetch_assoc($result);
-        $ngay_du_kien_nhan = $row['ngay_du_kien_nhan'];
-        $ngay_hien_tai = date('Y-m-d');
-        // Tính số ngày giữa ngày dự kiến nhận hàng và ngày hiện tại
-        $datediff = strtotime($ngay_du_kien_nhan) - strtotime($ngay_hien_tai);
-        $days_diff = round($datediff / (60 * 60 * 24));
-        // Nếu ngày dự kiến nhận hàng hơn 3 ngày so với ngày hiện tại, không cho phép trả hàng
-        if ($days_diff < 3) {
-            echo "<script>alert('Không thể yêu cầu hoàn trả!');</script>";
-        } else {
-            // Chuyển hướng đến trang yêu cầu trả hàng
-            $sql_update = "UPDATE lich_su_mua_hang SET trang_thai = 'Yêu cầu trả' WHERE id = $id";
-            if (mysqli_query($conn, $sql_update)) {
-                echo "<script>alert('Yêu cầu trả hàng thành công!');</script>";
-            } else {
-                echo "<script>alert('Xảy ra lỗi, vui lòng thử lại!!!');</script>";
-            }
-            // header("Location: yeu_cau_tra_hang.php?id=$id");
-            // exit();
-        }
+
+// Kiểm tra và xử lý yêu cầu "Đã nhận hàng"
+if (isset($_POST['action']) && $_POST['action'] == 'da_nhan' && isset($_POST['magd'])) {
+    $magd = $_POST['magd'];
+    $tinhtrang = 1;
+    $ngaynhan = date('Y-m-d H:i:s');
+
+    $update_query = "UPDATE giaodich SET tinhtrang = '$tinhtrang', ngaynhan = '$ngaynhan' WHERE magd = '$magd' AND user_id = '$userId'";
+    if (mysqli_query($conn, $update_query)) {
+        echo "Cập nhật thành công!";
+    } else {
+        echo "Lỗi khi cập nhật: " . mysqli_error($conn);
     }
 }
-// Lấy dữ liệu từ bảng lịch sử mua hàng chỉ với những đơn hàng đã hoàn thành hoặc giao hàng
-//$sql = "SELECT * FROM lich_su_mua_hang WHERE trang_thai IN ('Đã giao hàng', 'Hoàn tất')";
-$sql = "SELECT * FROM lich_su_mua_hang WHERE user_id = " . intval($user['id']);
-$result = mysqli_query($conn, $sql);
 
-
-// Hiển thị dữ liệu
+// Truy vấn lịch sử giao dịch
+$query = "SELECT magd, date, tongtien, tinhtrang, ngaynhan FROM giaodich WHERE user_id = '$userId'";
+$result = mysqli_query($conn, $query);
+if (!$result) {
+    die("Lỗi truy vấn: " . mysqli_error($conn));
+}
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch sử mua hàng</title>
+    <title>Lịch sử giao dịch</title>
     <style>
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Arial', sans-serif;
         margin: 20px;
         background-color: #f8f9fa;
+        color: #333;
     }
 
     h2 {
         text-align: center;
         color: #007bff;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    a.btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        background-color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    a.btn:hover {
+        background-color: #0056b3;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
         margin: 20px 0;
-    }
-
-    table,
-    th,
-    td {
-        border: 1px solid #dee2e6;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     th,
     td {
-        padding: 10px;
+        padding: 15px;
         text-align: center;
+        font-size: 16px;
     }
 
     th {
         background-color: #007bff;
         color: white;
+        font-weight: bold;
     }
 
     tr:nth-child(even) {
-        background-color: #f2f2f2;
+        background-color: #f9f9f9;
     }
 
-    .btn {
-        padding: 5px 10px;
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    td {
+        background-color: #fff;
+        border: 1px solid #ddd;
+    }
+
+    button {
+        padding: 8px 15px;
+        margin: 5px;
         border: none;
         border-radius: 4px;
+        font-size: 14px;
         cursor: pointer;
+        transition: background-color 0.3s ease;
     }
 
-    .btn-info {
-        background-color: #17a2b8;
+    button[type="submit"] {
+        background-color: #28a745;
         color: white;
     }
 
-    .btn-primary {
-        background-color: #007bff;
-        color: white;
+    button[type="submit"]:hover {
+        background-color: #218838;
     }
 
-    .btn-danger {
+    button[type="submit"]:nth-of-type(2) {
         background-color: #dc3545;
-        color: white;
     }
 
-    .btn:hover {
-        opacity: 0.9;
-        cursor: pointer;
-        text-decoration: underline;
+    button[type="submit"]:nth-of-type(2):hover {
+        background-color: #c82333;
+    }
+
+    button:focus {
+        outline: none;
+    }
+
+    form {
+        display: inline-block;
+    }
+
+    form input[type="hidden"] {
+        display: none;
     }
     </style>
 </head>
 
 <body>
     <a href="index.php" class="btn btn-primary">Quay lại</a>
-    <h2>Lịch sử mua hàng</h2>
+    <h2>Lịch sử giao dịch</h2>
     <table>
         <tr>
-            <th>Mã đơn hàng</th>
+            <th>Mã giao dịch</th>
             <th>Ngày đặt</th>
-            <th>Ngày dự kiến nhận</th>
             <th>Tổng tiền</th>
             <th>Trạng thái</th>
+            <th>Ngày Nhận</th>
             <th>Hành động</th>
         </tr>
         <?php while ($row = mysqli_fetch_assoc($result)) { ?>
         <tr>
-            <td><?php echo htmlspecialchars($row['id']); ?></td>
-            <td><?php echo htmlspecialchars($row['ngay_dat']); ?></td>
-            <td><?php echo htmlspecialchars($row['ngay_du_kien_nhan']); ?></td>
-            <td><?php echo htmlspecialchars($row['tong_tien']); ?></td>
-            <td><?php echo htmlspecialchars($row['trang_thai']); ?></td>
+            <td><?php echo $row['magd']; ?></td>
+            <td><?php echo $row['date']; ?></td>
+            <td><?php echo $row['tongtien']; ?></td>
+            <td><?php echo $row['tinhtrang'] == 1 ? 'Đã nhận' : 'Chưa nhận'; ?></td>
+            <td><?php echo $row['ngaynhan'] ?: ''; ?></td>
             <td>
-                <form method="POST" action="">
-                    <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                    <button type="submit" name="action" value="chi_tiet" class="btn btn-info">Thông tin đơn
-                        hàng</button>
-                    <button type="submit" name="action" value="da_nhan" class="btn btn-primary">Đã nhận hàng</button>
-                    <button type="submit" name="action" value="tra_hang" class="btn btn-danger">Yêu cầu trả
-                        hàng</button>
+                <form method="POST" action="thongtindonhang.php">
+                    <input type="hidden" name="magd" value="<?php echo $row['magd']; ?>">
+                    <button type="submit" name="action" value="chi_tiet">Thông tin giao dịch</button>
+                    <button type="submit" name="action" value="da_nhan">Đã nhận hàng</button>
                 </form>
             </td>
         </tr>
@@ -167,4 +183,8 @@ $result = mysqli_query($conn, $sql);
 </body>
 
 </html>
-<?php mysqli_close($conn); ?>
+
+<?php
+// Đóng kết nối
+mysqli_close($conn);
+?>

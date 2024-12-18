@@ -551,6 +551,24 @@ function signup() {
         return 0;
     }
 
+    // Kiểm tra số điện thoại đã tồn tại
+    $sqlTel = "SELECT * FROM thanhvien WHERE sodt = '" . $tel . "'";
+    $resultTel = mysqli_query($conn, $sqlTel);
+    if (mysqli_num_rows($resultTel) > 0) {
+        echo "<div class='errorMes'>Số điện thoại đã được sử dụng!</div>";
+        require_once 'signUp.php';
+        return 0;
+    }
+
+    // Kiểm tra email đã tồn tại
+    $sqlEmail = "SELECT * FROM thanhvien WHERE email = '" . $email . "'";
+    $resultEmail = mysqli_query($conn, $sqlEmail);
+    if (mysqli_num_rows($resultEmail) > 0) {
+        echo "<div class='errorMes'>Email đã được sử dụng!</div>";
+        require_once 'signUp.php';
+        return 0;
+    }
+
     // Thực hiện chèn dữ liệu vào bảng thanhvien
     date_default_timezone_set('Asia/Ho_Chi_Minh');
     $now = date("Y-m-d h:i:s");
